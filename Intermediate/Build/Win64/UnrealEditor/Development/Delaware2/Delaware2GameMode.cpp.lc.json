@@ -1,0 +1,29 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\admin\\documents\\unreal projects\\delaware2\\source\\delaware2\\delaware2gamemode.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\users\\admin\\documents\\unreal projects\\delaware2\\intermediate\\build\\win64\\delaware2editor\\development\\engine\\sharedpch.engine.shadowerrors.h.pch",
+        "Includes": [
+            "c:\\users\\admin\\documents\\unreal projects\\delaware2\\intermediate\\build\\win64\\unrealeditor\\development\\delaware2\\definitions.delaware2.h",
+            "c:\\users\\admin\\documents\\unreal projects\\delaware2\\source\\delaware2\\delaware2gamemode.h",
+            "c:\\program files\\epic games\\ue_5.0\\engine\\source\\runtime\\engine\\classes\\gameframework\\gamemodebase.h",
+            "c:\\program files\\epic games\\ue_5.0\\engine\\source\\runtime\\engine\\classes\\engine\\serverstatreplicator.h",
+            "c:\\program files\\epic games\\ue_5.0\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\serverstatreplicator.generated.h",
+            "c:\\program files\\epic games\\ue_5.0\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\gamemodebase.generated.h",
+            "c:\\users\\admin\\documents\\unreal projects\\delaware2\\intermediate\\build\\win64\\unrealeditor\\inc\\delaware2\\delaware2gamemode.generated.h",
+            "c:\\users\\admin\\documents\\unreal projects\\delaware2\\source\\delaware2\\delaware2playercontroller.h",
+            "c:\\users\\admin\\documents\\unreal projects\\delaware2\\intermediate\\build\\win64\\unrealeditor\\inc\\delaware2\\delaware2playercontroller.generated.h",
+            "c:\\users\\admin\\documents\\unreal projects\\delaware2\\source\\delaware2\\delaware2character.h",
+            "c:\\program files\\epic games\\ue_5.0\\engine\\source\\runtime\\engine\\classes\\gameframework\\character.h",
+            "c:\\program files\\epic games\\ue_5.0\\engine\\source\\runtime\\engine\\classes\\gameframework\\charactermovementreplication.h",
+            "c:\\program files\\epic games\\ue_5.0\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\charactermovementreplication.generated.h",
+            "c:\\program files\\epic games\\ue_5.0\\engine\\source\\runtime\\engine\\classes\\gameframework\\rootmotionsource.h",
+            "c:\\program files\\epic games\\ue_5.0\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\rootmotionsource.generated.h",
+            "c:\\program files\\epic games\\ue_5.0\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\character.generated.h",
+            "c:\\users\\admin\\documents\\unreal projects\\delaware2\\intermediate\\build\\win64\\unrealeditor\\inc\\delaware2\\delaware2character.generated.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

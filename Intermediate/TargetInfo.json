@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "Delaware2",
+			"Path": "C:\\Users\\Admin\\Documents\\Unreal Projects\\Delaware2\\Source\\Delaware2.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "Delaware2Editor",
+			"Path": "C:\\Users\\Admin\\Documents\\Unreal Projects\\Delaware2\\Source\\Delaware2Editor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}

@@ -1,0 +1,15 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\admin\\documents\\unreal projects\\delaware2\\intermediate\\build\\win64\\unrealeditor\\inc\\delaware2\\tabletopactor.gen.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\users\\admin\\documents\\unreal projects\\delaware2\\intermediate\\build\\win64\\delaware2editor\\development\\engine\\sharedpch.engine.shadowerrors.h.pch",
+        "Includes": [
+            "c:\\users\\admin\\documents\\unreal projects\\delaware2\\intermediate\\build\\win64\\unrealeditor\\development\\delaware2\\definitions.delaware2.h",
+            "c:\\users\\admin\\documents\\unreal projects\\delaware2\\source\\delaware2\\tabletopactor.h",
+            "c:\\users\\admin\\documents\\unreal projects\\delaware2\\intermediate\\build\\win64\\unrealeditor\\inc\\delaware2\\tabletopactor.generated.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}
