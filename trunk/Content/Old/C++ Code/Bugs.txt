@@ -1,0 +1,76 @@
+---Pre-Alpha---
+---Alpha---
+---Beta---
+[Legend]
+(X) Think is fixed, but so hard to reproduce that I can't say for sure
+(A) Crash or cannot continue or will keep us from being approved
+(B) Significant Bug, but can get around to continue playing, no way we'll ship with it unless it's hard to reproduce
+(C) Insignificant Bug, something we'd like to fix, particularly if it's easy, but will ship w/ it if needed
+(D) Design Improvement/Bug Do if time permits
+(?) Haven't seen this in a while, might somehow be fixed
+(!) Not fixed, hard to reproduce
+[\Legend]
+
+David Neyland, DARPA’s director of tactical technology
+
+(1A?) Game Locks up if you start clicking too often
+
+(1B!) If everyone passes, game subtracts points from team who didn't save their meld, even if they didn't take bid
+(2B!) if team A has meld when team B does not have enough to play hand, the scores are not always reflected (this does work when team doesn't have a marriage)
+(3B!) Sometimes, two people bid same amount (might be when they are bidding on a run)
+(4BX) After getting a lot of meld, +127 over bid, the game says you need a lot to get
+(5B!) Scoreboard breaks sometimes, not sure why
+
+(1D) Support aspect ratios of 1.3333 (done), 1.6f, then 1.7f (Kindle Fire)
+(2D) Need better sounds--take to Ryan
+
+Bug Totals--
+(12/1): 20 Total, A: 0, B: 12, C: 8
+(12/5): 22 Total, A: 3, B: 4, C: 13, D: 2
+(12/7): 16 Total, A: 3, B: 6, C: 5, D: 2
+(12/14): 10 Total, A: 0, B: 7, C: 1, D: 2
+(12/22): 5 Total, A: 0, B: 4, C: 1, D: 0
+
+Art--
+
+---Next Version---
+Facebook Push for iOS
+Facebook Push for Bada
+Facebook Push for Android
+Facebook Push for MeeGo
+Make Point Click part of numbers--working, and now we're not over memory, do this after release
+For PC, have res options?
+Put in multi-language support
+
+---Thursdays---
+Place a new build up on ftp server at 5PM
+
+Bobby
+
+
+Michael
+Steam Release: http://www.steampowered.com/steamworks/title-submission.php need Gameplay Trailer, Demo Build (one game)
+
+Tim
+Finalizing Electric Tech
+Finalizing Ancient?
+Lightining-ish Bid Bubbles for Electric Tech
+Lightining-ish Meld Bubbles for Electric Tech
+
+Ade
+Need to get rid of flicker during trump selection
+
+Jose
+
+James
+(Beta) Mobile functionality (11/9)
+
+Kris
+Card backs for Christmas?
+
+Nick Jizba
+Need better card backs for Future Tech
+Need Grayed out Trump Selection Symbols
+
+Tony
+(Alpha) Need New applause sounds
