@@ -1,19 +1,30 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
+#include "Delaware2GameState.h"
 #include "Delaware2GameMode.generated.h"
 
-UCLASS(minimalapi)
-class ADelaware2GameMode : public AGameModeBase
+/**
+ * 
+ */
+UCLASS()
+class DELAWARE2_API ADelaware2GameMode : public AGameMode
 {
 	GENERATED_BODY()
-
+	
 public:
 	ADelaware2GameMode();
+
+	
+	
+
+protected:
+
+
+private:
+
+	
 };
-
-
-

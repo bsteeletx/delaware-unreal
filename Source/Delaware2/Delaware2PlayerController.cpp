@@ -5,7 +5,7 @@
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Delaware2Character.h"
+#include "Delaware2Pawn.h"
 #include "Engine/World.h"
 
 ADelaware2PlayerController::ADelaware2PlayerController()
