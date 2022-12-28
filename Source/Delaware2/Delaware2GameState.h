@@ -63,7 +63,7 @@ public:
 
 	EGameStates GetCurrentState() const;
 
-	class ACardActor* GetNextCard();
+	class ACard* GetNextCard();
 
 	EPlayers GetDealer() const;
 	void IncrementDealer();
@@ -79,7 +79,7 @@ private:
 	void GetDealingOffset(FVector* locationToDealTo);
 	void DealCard();
 	void Shuffle();
-	class ACardActor* GetCardByID(uint8 value);
+	class ACard* GetCardByID(uint8 value);
 
 	UPROPERTY(EditAnywhere, Category = "Dealing")
 		float DealDelay = 500;
@@ -99,7 +99,7 @@ private:
 		float CardSpacingByDepth;
 
 	UPROPERTY(VisibleAnywhere, Category = "Dealing")
-		TArray<ACardActor*> Deck;
+		TArray<ACard*> Deck;
 
 
 	UPROPERTY(VisibleAnywhere, Category = "Dealing")
@@ -113,6 +113,8 @@ private:
 		int8 HandCounter;
 
 	const FVector DealStartLocations[4]{ FVector(0, -3200, 3), FVector(5000, 0, 3), FVector(0, 3600, 3), FVector(-5200, 0, 3) }; //north, east, south, west
+
+	TSubclassOf<ACard> CardClass;
 
 	//UPROPERTY(VisibleAnywhere)
 	//ADelawarePlayerState* PlayerStates[4];

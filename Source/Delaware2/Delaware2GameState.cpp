@@ -2,7 +2,7 @@
 
 
 #include "Delaware2GameState.h"
-#include "CardActor.h"
+#include "Card.h"
 #include "Engine/TargetPoint.h"
 
 
@@ -57,7 +57,7 @@ void ADelaware2GameState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (ACardActor* Card : TActorRange<ACardActor>(GetWorld()))
+	/*for (ACard* Card : TActorRange<ACard>(GetWorld()))
 	{
 		//FVector CardStartLocation = DealStartLocations[(int)Dealer];
 		FVector CardStartLocation = FVector::Zero();
@@ -95,7 +95,7 @@ void ADelaware2GameState::BeginPlay()
 			//UE_LOG(LogTemp, Warning, TEXT("Found a location!"));
 			DealLocations.Add(EPlayers::West, Actor->GetActorLocation());
 		}
-	}
+	}*/
 }
 
 void ADelaware2GameState::DealCard()
@@ -122,7 +122,7 @@ void ADelaware2GameState::DealCard()
 		return;
 	}
 	//crashes here trying to get 81st card
-	ACardActor* CardToDeal = GetNextCard();
+	ACard* CardToDeal = GetNextCard();
 	CardToDeal->Enable();
 
 	if (DealLocations.Num() != 4)
@@ -177,12 +177,12 @@ void ADelaware2GameState::Shuffle()
 		{
 			Random = FMath::RandRange(0, j);
 
-			Swap<ACardActor*>(Deck[j], Deck[Random]);
+			Swap<ACard*>(Deck[j], Deck[Random]);
 		}
 	}
 }
 
-ACardActor* ADelaware2GameState::GetCardByID(uint8 value)
+ACard* ADelaware2GameState::GetCardByID(uint8 value)
 {
 	return Deck[value];
 }
@@ -212,7 +212,7 @@ void ADelaware2GameState::GetDealingOffset(FVector* locationToDealTo)
 	locationToDealTo->Z = DepthAmount;
 }
 
-ACardActor* ADelaware2GameState::GetNextCard()
+ACard* ADelaware2GameState::GetNextCard()
 {
 	return GetCardByID(DeckCounter++);
 }

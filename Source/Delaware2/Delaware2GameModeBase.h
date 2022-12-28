@@ -24,7 +24,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	class ACardActor* GetNextCard();
+	class ACard* GetNextCard();
 
 	EPlayers GetDealer();
 	uint8 GetDeckCounter();
@@ -58,10 +58,10 @@ private:
 		float CardSpacingByDepth;
 
 	UPROPERTY(VisibleAnywhere)
-		TArray<class ACardActor*> Deck;
+		TArray<class ACard*> Deck;
 
 	void Shuffle();
-	ACardActor* GetCardByID(uint8 value);
+	ACard* GetCardByID(uint8 value);
 
 	UPROPERTY(VisibleAnywhere)
 		EPlayers Dealer;

@@ -2,7 +2,7 @@
 
 
 #include "Hand.h"
-#include "CardActor.h"
+#include "Card.h"
 
 Hand::Hand()
 {
@@ -58,7 +58,7 @@ uint8 Hand::GetNumberOfCardsOfType(ERank rank, ESuit suit)
 	bool AllSuitsOK = suit == ESuit::All;
 	uint8 NumberOfCards = 0;
 
-	for (ACardActor* Card : Cards)
+	for (ACard* Card : Cards)
 	{
 		if ((AllRanksOK || Card->GetRank() == rank) && (AllSuitsOK || Card->GetSuit() == suit))
 		{
@@ -69,7 +69,7 @@ uint8 Hand::GetNumberOfCardsOfType(ERank rank, ESuit suit)
 	return NumberOfCards;
 }
 
-void Hand::RemoveCard(ACardActor* toRemove)
+void Hand::RemoveCard(ACard* toRemove)
 {
 	if (HasCard(toRemove))
 	{
@@ -77,7 +77,7 @@ void Hand::RemoveCard(ACardActor* toRemove)
 	}
 }
 
-bool Hand::HasCard(ACardActor* toFind)
+bool Hand::HasCard(ACard* toFind)
 {
 	if (Cards.Find(toFind) != INDEX_NONE)
 		return true;
@@ -85,7 +85,7 @@ bool Hand::HasCard(ACardActor* toFind)
 	return false;
 }
 
-void Hand::AddCard(ACardActor* toAdd)
+void Hand::AddCard(ACard* toAdd)
 {
 	Cards.Add(toAdd);
 }
@@ -154,7 +154,7 @@ EAroundAmount Hand::GetNumberOfAround(ERank rank)
 
 	for (int j = (int)ESuit::Clubs; j < (int)ESuit::All; j++)
 	{
-		ACardActor Temp = ACardActor();
+		ACard Temp = ACard();
 		Temp.SetRank(rank);
 		Temp.SetSuit((ESuit)j);
 
@@ -272,8 +272,8 @@ uint8 Hand::GetMeldFromAround()
 
 uint8 Hand::GetMeldFromPinochles()
 {
-	ACardActor QueenOfSpades;
-	ACardActor JackOfDiamonds;
+	ACard QueenOfSpades;
+	ACard JackOfDiamonds;
 	QueenOfSpades.SetRank(ERank::Queen);
 	QueenOfSpades.SetSuit(ESuit::Spades);
 	JackOfDiamonds.SetRank(ERank::Jack);
@@ -390,10 +390,10 @@ bool Hand::HasMarriageIn(ESuit suit)
 
 uint8 Hand::GetSuitValue(ESuit suit)
 {
-	TArray<ACardActor*> CardsInSuit = GetAllCardsOfSuit(suit);
+	TArray<ACard*> CardsInSuit = GetAllCardsOfSuit(suit);
 	uint8 Value = 0;
 
-	for (ACardActor* Card : CardsInSuit)
+	for (ACard* Card : CardsInSuit)
 	{
 		Value += (int)Card->GetRank();
 	}
@@ -401,11 +401,11 @@ uint8 Hand::GetSuitValue(ESuit suit)
 	return Value;
 }
 
-TArray<ACardActor*> Hand::GetAllCardsOfSuit(ESuit suit)
+TArray<ACard*> Hand::GetAllCardsOfSuit(ESuit suit)
 {
-	TArray<ACardActor*> AllCardsInSuit;
+	TArray<ACard*> AllCardsInSuit;
 
-	for (ACardActor* Card : Cards)
+	for (ACard* Card : Cards)
 	{
 		if (Card->GetSuit() == suit)
 		{

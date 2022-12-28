@@ -81,9 +81,9 @@ public:
 	~Hand();
 
 	void Reset();
-	void AddCard(ACardActor* toAdd);
-	bool HasCard(ACardActor* cardToFind);
-	void RemoveCard(ACardActor* toRemove);
+	void AddCard(class ACard* toAdd);
+	bool HasCard(ACard* cardToFind);
+	void RemoveCard(ACard* toRemove);
 	uint8 GetNumberOfCardsOfType(ERank rank, ESuit suit);
 	uint8 GetSize();
 	void Sort();
@@ -104,10 +104,10 @@ private:
 	uint8 GetRunSize(ESuit suit);
 	void CalculateMeld();
 	uint8 GetSuitValue(ESuit suit);
-	TArray<class ACardActor*> GetAllCardsOfSuit(ESuit suit);
+	TArray<class ACard*> GetAllCardsOfSuit(ESuit suit);
 	uint8 GetNumberOfAces();
 
-	TArray<class ACardActor*> Cards;
+	TArray<class ACard*> Cards;
 	TMap<EMeldType, uint8> MeldValues;
 	uint8 RunsInSuits;
 	ESuitMeld DoubleRunInSuit;

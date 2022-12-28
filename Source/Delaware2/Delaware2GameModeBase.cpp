@@ -2,7 +2,7 @@
 
 
 #include "Delaware2GameModeBase.h"
-#include "CardActor.h"
+#include "Card.h"
 #include "EngineUtils.h"
 #include "Engine/TargetPoint.h"
 
@@ -27,7 +27,7 @@ void ADelaware2GameModeBase::BeginPlay()
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay Function called!"));
 
 	
-	for (ACardActor* Card : TActorRange<ACardActor>(GetWorld()))
+	for (ACard* Card : TActorRange<ACard>(GetWorld()))
 	{
 		Deck.Add(Card);
 	}
@@ -106,7 +106,7 @@ void ADelaware2GameModeBase::DealCard()
 		}
 	}
 
-	ACardActor* CardToDeal = GetNextCard();
+	ACard* CardToDeal = GetNextCard();
 
 	if (DealLocations.Num() != 4)
 	{
@@ -162,12 +162,12 @@ void ADelaware2GameModeBase::Shuffle()
 		{
 			Random = FMath::RandRange(0, j);
 
-			Swap<ACardActor*>(Deck[j], Deck[Random]);
+			Swap<ACard*>(Deck[j], Deck[Random]);
 		}
 	}
 }
 
-ACardActor* ADelaware2GameModeBase::GetCardByID(uint8 value)
+ACard* ADelaware2GameModeBase::GetCardByID(uint8 value)
 {
 	return Deck[value];
 }
@@ -197,7 +197,7 @@ void ADelaware2GameModeBase::GetDealingOffset(FVector& locationToDealTo)
 	locationToDealTo.Z = DepthAmount;
 }
 
-ACardActor* ADelaware2GameModeBase::GetNextCard()
+ACard* ADelaware2GameModeBase::GetNextCard()
 {
 	return GetCardByID(DeckCounter++);
 }
