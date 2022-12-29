@@ -154,7 +154,10 @@ void ACard::SetToLocation(FVector* location)
 	FString VectorLocation = TempVector.ToString();
 	UE_LOG(LogTemp, Warning, TEXT("Sending Card ID %d to: %s"), GetCardID(), *TempVector.ToString());
 	
-	SetActorLocation(TempVector);
+	FRotator CurrentRotation = GetActorRotation();
+	SetActorEnableCollision(false);
+	TeleportTo(*location, CurrentRotation);
+	SetActorEnableCollision(true);
 	CurrentLocation = location;
 }
 

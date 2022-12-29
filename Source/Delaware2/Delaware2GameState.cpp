@@ -57,20 +57,21 @@ void ADelaware2GameState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	/*for (ACard* Card : TActorRange<ACard>(GetWorld()))
+	float HeightIterator = 0;
+
+	for (ACard* Card : TActorRange<ACard>(GetWorld()))
 	{
 		//FVector CardStartLocation = DealStartLocations[(int)Dealer];
 		FVector CardStartLocation = FVector::Zero();
-		CardStartLocation.Z = 10;
+		CardStartLocation.Z = 0.2f + HeightIterator;
 		Card->SetToLocation(&CardStartLocation);
 		UE_LOG(LogTemp, Warning, TEXT("Setting Card %d to Location %s"), Card->GetCardID(), *CardStartLocation.ToString());
 		Deck.Add(Card);
-		Card->Disable();
+		//Card->Disable();
+		HeightIterator += 0.2f;
 	}
-
-	int iterator = 0;
 	
-	TActorRange<AActor> Actors = TActorRange<AActor>(Deck[0]->GetWorld());
+	TActorRange<AActor> Actors = TActorRange<AActor>(GetWorld());
 	for (AActor* Actor : Actors)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Actor: %s"), *Actor->GetName());
@@ -95,7 +96,7 @@ void ADelaware2GameState::BeginPlay()
 			//UE_LOG(LogTemp, Warning, TEXT("Found a location!"));
 			DealLocations.Add(EPlayers::West, Actor->GetActorLocation());
 		}
-	}*/
+	}
 }
 
 void ADelaware2GameState::DealCard()
