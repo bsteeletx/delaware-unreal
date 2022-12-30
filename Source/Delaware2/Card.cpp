@@ -35,8 +35,13 @@ void ACard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (GetActorLocation().Z < 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Card %d is off the table!!!"), GetCardID());
+	}
 	if (IsMoving)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Card %d Ultimate Location will be %s"), GetCardID(), *MoveLocation->ToString());
 		MoveToLocation(MoveLocation);
 	}
 }
@@ -168,36 +173,41 @@ void ACard::MoveToLocation(FVector* location)
 		UE_LOG(LogTemp, Warning, TEXT("location passed to ACard::MoveToLocation is null"));
 		return;
 	}
-	MoveLocation = location;
+	MoveLocation->Y = location->Y;
+	MoveLocation->X = location->X;
+	MoveLocation->Z = location->Z;
 	float DeltaTime = GetWorld()->GetDeltaSeconds();
 
 	if (GetActorLocation() == *location)
 	{
 		IsMoving = false;
+		UE_LOG(LogTemp, Warning, TEXT("Final Location Reached for Card #%d"), GetCardID());
 		return;
 	}
 	else if (!IsMoving)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Starting to move Card #%d"), GetCardID());
+		UE_LOG(LogTemp, Warning, TEXT("Attempting to move Card #%d, to its ultimate destination, %s"), GetCardID(), *MoveLocation->ToString());
 		IsMoving = true;
 	}
 
 	FVector DeltaLocation(0.f);
 	DeltaLocation = *location * DeltaTime * CardMoveSpeed; //X = Value * DeltaTime * Speed
+
+	UE_LOG(LogTemp, Warning, TEXT("Card #%d is at %s, trying to move it to %s for now"), GetCardID(), *GetActorLocation().ToString(), *DeltaLocation.ToString());
 	
-	AddActorWorldOffset(DeltaLocation);
+	AddActorWorldOffset(DeltaLocation, false, nullptr, ETeleportType::ResetPhysics);
 }
 
 void ACard::Enable()
 {
-	GetRootComponent()->SetComponentTickEnabled(true);
-	GetRootComponent()->SetActive(true);
-	SetActorEnableCollision(true);
+	//GetRootComponent()->SetComponentTickEnabled(true);
+	//GetRootComponent()->SetActive(true);
+	//SetActorEnableCollision(true);
 }
 
 void ACard::Disable()
 {
-	GetRootComponent()->SetComponentTickEnabled(false);
-	GetRootComponent()->SetActive(false);
-	SetActorEnableCollision(false);
+	//GetRootComponent()->SetComponentTickEnabled(false);
+	//GetRootComponent()->SetActive(false);
+	//SetActorEnableCollision(false);
 }

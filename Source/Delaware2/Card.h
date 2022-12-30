@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/StaticMeshActor.h"
-#include "Delaware2GameModeBase.h"
+#include "Delaware2GameMode.h"
 #include "Card.generated.h"
 
 UCLASS()
@@ -45,6 +45,8 @@ public:
 	void MoveToLocation(FVector* location);
 	void Enable();
 	void Disable();
+	void Hide();
+
 
 private:
 

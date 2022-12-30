@@ -84,7 +84,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Dealing")
 		float DealDelay = 500;
 
-	float DealTime = 0;
+	float DealTime = 500;
 
 	UPROPERTY(EditAnywhere, Category = "State Handling")
 		EGameStates CurrentState;
@@ -114,7 +114,7 @@ private:
 
 	const FVector DealStartLocations[4]{ FVector(0, -3200, 3), FVector(5000, 0, 3), FVector(0, 3600, 3), FVector(-5200, 0, 3) }; //north, east, south, west
 
-	TSubclassOf<ACard> CardClass;
+	
 
 	//UPROPERTY(VisibleAnywhere)
 	//ADelawarePlayerState* PlayerStates[4];

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Delaware2GameModeBase.h"
+#include "Delaware2GameMode.h"
 
 UENUM()
 enum class ESuitMeld : uint8 { None = 0, 

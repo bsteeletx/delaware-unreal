@@ -33,6 +33,13 @@ void ADelaware2GameState::Tick(float DeltaTime)
 		const bool NextSetOfFour = DeckCounter % 4 == 0;
 		const bool FirstCard = DeckCounter == 0;
 
+		if (WaitLonger)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Too soon to deal next card, DealTime is %f"), DealTime)
+			DealTime += DeltaTime;
+			return;
+		}
+
 		if (!WithinDeckCounterRange)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Finished Dealing"));
@@ -40,13 +47,13 @@ void ADelaware2GameState::Tick(float DeltaTime)
 		}
 		else if (FirstCard || !NextSetOfFour) //Deal at roughly the same time
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Dealing Card %d"), DeckCounter);
+			UE_LOG(LogTemp, Warning, TEXT("Dealing Card %d"), DeckCounter);
 			DealCard();
 			DealTime += DeltaTime;
 		}
 		else if (NextSetOfFour)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Dealing to Next Player"));
+			UE_LOG(LogTemp, Warning, TEXT("Dealing to Next Player"));
 			DealTime = 0; //reset DealTime
 			DealCard(); //temp
 		}
@@ -67,31 +74,32 @@ void ADelaware2GameState::BeginPlay()
 		Card->SetToLocation(&CardStartLocation);
 		UE_LOG(LogTemp, Warning, TEXT("Setting Card %d to Location %s"), Card->GetCardID(), *CardStartLocation.ToString());
 		Deck.Add(Card);
-		//Card->Disable();
 		HeightIterator += 0.2f;
 	}
+
+	Shuffle();
 	
 	TActorRange<AActor> Actors = TActorRange<AActor>(GetWorld());
 	for (AActor* Actor : Actors)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Actor: %s"), *Actor->GetName());
 
-		if (Actor->GetActorLabel() == TEXT("NorthCardStartLoc"))
+		if (Actor->GetActorNameOrLabel() == TEXT("NorthCardStartLoc"))
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Found North location!"));
 			DealLocations.Add(EPlayers::North, Actor->GetActorLocation());
 		}
-		else if (Actor->GetActorLabel() == TEXT("EastCardStartLoc")) //Definitely works! TODO: Find more elegant solution
+		else if (Actor->GetActorNameOrLabel() == TEXT("EastCardStartLoc")) //Definitely works! TODO: Find more elegant solution
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Found a location!"));
 			DealLocations.Add(EPlayers::East, Actor->GetActorLocation());
 		}
-		else if (Actor->GetActorLabel() == TEXT("SouthCardStartLoc")) //Definitely works! TODO: Find more elegant solution
+		else if (Actor->GetActorNameOrLabel() == TEXT("SouthCardStartLoc")) //Definitely works! TODO: Find more elegant solution
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Found a location!"));
 			DealLocations.Add(EPlayers::South, Actor->GetActorLocation());
 		}
-		else if (Actor->GetActorLabel() == TEXT("WestCardStartLoc")) //Definitely works! TODO: Find more elegant solution
+		else if (Actor->GetActorNameOrLabel() == TEXT("WestCardStartLoc")) //Definitely works! TODO: Find more elegant solution
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Found a location!"));
 			DealLocations.Add(EPlayers::West, Actor->GetActorLocation());
@@ -122,7 +130,7 @@ void ADelaware2GameState::DealCard()
 		UE_LOG(LogTemp, Warning, TEXT("DeckCounter > 79!!"));
 		return;
 	}
-	//crashes here trying to get 81st card
+	
 	ACard* CardToDeal = GetNextCard();
 	CardToDeal->Enable();
 
@@ -181,6 +189,13 @@ void ADelaware2GameState::Shuffle()
 			Swap<ACard*>(Deck[j], Deck[Random]);
 		}
 	}
+
+	//debug
+	UE_LOG(LogTemp, Warning, TEXT("DECK DUMP"))
+	for (int i = 0; i < 80; i++)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Card %d: %d"), i, Deck[i]->GetCardID());
+	}
 }
 
 ACard* ADelaware2GameState::GetCardByID(uint8 value)
@@ -215,6 +230,7 @@ void ADelaware2GameState::GetDealingOffset(FVector* locationToDealTo)
 
 ACard* ADelaware2GameState::GetNextCard()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Getting Next Card, DeckCounter: %d"), DeckCounter);
 	return GetCardByID(DeckCounter++);
 }
 
