@@ -42,10 +42,9 @@ public:
 	ESuit GetSuit() const;
 
 	void SetToLocation(FVector* location);
-	void MoveToLocation(FVector* location);
+	void DealToLocation(FVector* destination);
 	void Enable();
 	void Disable();
-	void Hide();
 
 
 private:
@@ -87,5 +86,12 @@ private:
 
 	FVector* CurrentLocation;
 
-	FVector* MoveLocation = { 0 };
+	FVector FinalDestination = { 0.0, 0.0, 0.0 };
+
+	void SetMoveDestination(FVector* destination);
+
+	FVector GetDealOffset(EPlayers dealer);
+
+	UPROPERTY(EditAnywhere)
+	float InverseForceMultiplier = 1000.0f;
 };

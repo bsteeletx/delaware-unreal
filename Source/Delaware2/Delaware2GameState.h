@@ -8,12 +8,12 @@
 #include "Delaware2GameState.generated.h"
 
 
-UENUM()
+UENUM(BlueprintType)
 enum class ERank : uint8 { None = 0, Jack, Queen, King, Ten, Ace, All, Any };
 
 const static ERank AllRanks[] = { ERank::Jack, ERank::Queen, ERank::King, ERank::Ten, ERank::Ace };
 
-UENUM()
+UENUM(BlueprintType)
 enum class ESuit : uint8 { None = 0, Diamonds, Clubs, Hearts, Spades, All, Any };
 
 const static ESuit AllSuits[] = { ESuit::Diamonds, ESuit::Clubs,  ESuit::Hearts, ESuit::Spades };
@@ -26,10 +26,39 @@ enum class EGameStates : uint8 {
 //Bidding,
 //ShowingMeld,
 
-UENUM()
+UENUM(BlueprintType)
 enum class EPlayers : uint8 { None = 0, North, East, South, West, All, Any };
 
 const static EPlayers AllPlayers[] = { EPlayers::North, EPlayers::East, EPlayers::South, EPlayers::West };
+
+//UENUM()
+//enum class EDealingLocations : uint8 { None = 0, Deck, Deal, Hand, All, Any };
+
+USTRUCT() struct FDealLocationVectors
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere)
+	FVector Locations[3];
+
+	void SetALocation(/*EDealingLocations*/int location, FVector value)
+	{
+		Locations[(int)location - 1] = value; //Skipping None
+	}
+
+	FVector GetALocation(/*EDealingLocations*/int location)
+	{
+		return Locations[(int)location - 1];
+	}
+
+	FDealLocationVectors()
+	{
+		for (FVector V : Locations)
+		{
+			V = FVector::Zero();
+		}
+	}
+};
 
 static EPlayers operator++ (EPlayers e)
 {
@@ -80,6 +109,13 @@ private:
 	void DealCard();
 	void Shuffle();
 	class ACard* GetCardByID(uint8 value);
+	FVector GetSideToSideOffset();
+	void DealLocationSetup();
+	EPlayers GetDealLocationPlayer(AActor* target);
+	/*EDealingLocations*/int GetDealLocationLoc(AActor* target);
+
+	UPROPERTY(EditAnywhere, Category = "Dealing")
+		FVector DealingOffset;
 
 	UPROPERTY(EditAnywhere, Category = "Dealing")
 		float DealDelay = 500;
@@ -90,7 +126,7 @@ private:
 		EGameStates CurrentState;
 
 	UPROPERTY(VisibleAnywhere, Category = "Dealing")
-		TMap<EPlayers, FVector> DealLocations;
+		TMap<EPlayers, FDealLocationVectors> DealLocations;
 
 	UPROPERTY(EditAnywhere, Category = "Dealing")
 		float CardSpacing;
@@ -102,8 +138,7 @@ private:
 		TArray<ACard*> Deck;
 
 
-	UPROPERTY(VisibleAnywhere, Category = "Dealing")
-		EPlayers Dealer;
+	EPlayers Dealer;
 
 	EPlayers PlayerToDealTo;
 
@@ -112,9 +147,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Misc")
 		int8 HandCounter;
 
-	const FVector DealStartLocations[4]{ FVector(0, -3200, 3), FVector(5000, 0, 3), FVector(0, 3600, 3), FVector(-5200, 0, 3) }; //north, east, south, west
-
-	
+	const FVector* DeckStartLocations[4];
+	const FVector* DealStartLocations[4];
 
 	//UPROPERTY(VisibleAnywhere)
 	//ADelawarePlayerState* PlayerStates[4];

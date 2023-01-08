@@ -16,7 +16,7 @@ ADelaware2GameState::ADelaware2GameState()
 	DeckCounter = 0;
 	HandCounter = 0;
 
-	DealLocations.Reserve(4);
+	//DealLocations.Reserve(4);
 }
 
 void ADelaware2GameState::Tick(float DeltaTime)
@@ -64,47 +64,90 @@ void ADelaware2GameState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	float HeightIterator = 0;
+	/*float HeightIterator = 0;
 
 	for (ACard* Card : TActorRange<ACard>(GetWorld()))
 	{
-		//FVector CardStartLocation = DealStartLocations[(int)Dealer];
+		//FVector CardStartLocation = DeckStartLocations[(int)Dealer];
 		FVector CardStartLocation = FVector::Zero();
-		CardStartLocation.Z = 0.2f + HeightIterator;
-		Card->SetToLocation(&CardStartLocation);
+		CardStartLocation.Z = 0.2f * HeightIterator;
+		//Card->SetToLocation(&CardStartLocation);
 		UE_LOG(LogTemp, Warning, TEXT("Setting Card %d to Location %s"), Card->GetCardID(), *CardStartLocation.ToString());
 		Deck.Add(Card);
-		HeightIterator += 0.2f;
+		HeightIterator++;
 	}
 
 	Shuffle();
-	
+
+	DealLocationSetup();
+	*/
+}
+
+void ADelaware2GameState::DealLocationSetup()
+{
+	//FDealLocationVectors Locations[4];
+
 	TActorRange<AActor> Actors = TActorRange<AActor>(GetWorld());
 	for (AActor* Actor : Actors)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Actor: %s"), *Actor->GetName());
 
-		if (Actor->GetActorNameOrLabel() == TEXT("NorthCardStartLoc"))
+		EPlayers ThisPlayer = GetDealLocationPlayer(Actor);
+		
+		if (ThisPlayer != EPlayers::None)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Found North location!"));
-			DealLocations.Add(EPlayers::North, Actor->GetActorLocation());
-		}
-		else if (Actor->GetActorNameOrLabel() == TEXT("EastCardStartLoc")) //Definitely works! TODO: Find more elegant solution
-		{
-			//UE_LOG(LogTemp, Warning, TEXT("Found a location!"));
-			DealLocations.Add(EPlayers::East, Actor->GetActorLocation());
-		}
-		else if (Actor->GetActorNameOrLabel() == TEXT("SouthCardStartLoc")) //Definitely works! TODO: Find more elegant solution
-		{
-			//UE_LOG(LogTemp, Warning, TEXT("Found a location!"));
-			DealLocations.Add(EPlayers::South, Actor->GetActorLocation());
-		}
-		else if (Actor->GetActorNameOrLabel() == TEXT("WestCardStartLoc")) //Definitely works! TODO: Find more elegant solution
-		{
-			//UE_LOG(LogTemp, Warning, TEXT("Found a location!"));
-			DealLocations.Add(EPlayers::West, Actor->GetActorLocation());
+			/*EDealingLocations*/int ThisLocation = GetDealLocationLoc(Actor);
+		//	Locations->SetALocation(ThisLocation, Actor->GetActorLocation());
+			//UE_LOG(LogTemp, Warning, TEXT("Target Name: %s, is at %s"), *Actor->GetActorNameOrLabel(), *Locations->GetALocation(ThisLocation).ToCompactString());
 		}
 	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		//DealLocations.Add((EPlayers)(i + 1), Locations[i]);
+	}
+}
+
+/*EDealingLocations*/int ADelaware2GameState::GetDealLocationLoc(AActor* target)
+{
+	if (target->GetActorNameOrLabel().Contains(TEXT("Deal")))
+	{
+		//return EDealingLocations::Deal;
+		return 1;
+	}
+	
+	if (target->GetActorNameOrLabel().Contains(TEXT("Card")))
+	{
+		//return EDealingLocations::Hand;
+		return 2;
+	}
+
+	//return EDealingLocations::Deck;
+	return 3;
+}
+
+
+EPlayers ADelaware2GameState::GetDealLocationPlayer(AActor* target)
+{
+	if (target->GetActorNameOrLabel().Contains(TEXT("North")))
+	{
+		return EPlayers::North;
+	}
+	if (target->GetActorNameOrLabel().Contains(TEXT("East")))
+	{
+		return EPlayers::East;
+	}
+	if (target->GetActorNameOrLabel().Contains(TEXT("South")))
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Found a location!"));
+		return EPlayers::South;
+	}
+	if (target->GetActorNameOrLabel().Contains(TEXT("West")))
+	{
+		return EPlayers::West;
+	}
+
+	return EPlayers::None;
 }
 
 void ADelaware2GameState::DealCard()
@@ -132,7 +175,7 @@ void ADelaware2GameState::DealCard()
 	}
 	
 	ACard* CardToDeal = GetNextCard();
-	CardToDeal->Enable();
+	
 
 	if (DealLocations.Num() != 4)
 	{
@@ -140,14 +183,48 @@ void ADelaware2GameState::DealCard()
 		return;
 	}
 
-	FVector LocationToDealTo = DealLocations[PlayerToDealTo];
+	//TODO: Crashes somewhere with new code..find out where it is and try to undo it
+
+	FVector LocationToDealTo = DealLocations[PlayerToDealTo].GetALocation(/*(int)EDealingLocations::Deal*/2 - 1); //-1 because we're skipping none value
+	FVector LocationToDealFrom = DealLocations[Dealer].GetALocation(/*(int)EDealingLocations::Deal*/2 - 1);
 
 	//have to raise the card by 0.2 and the offset by width and multiply each by the (int)(DeckCounter / 16) + (int)DeckCounter % 4 : West(DeckCounter, Z): 
 	GetDealingOffset(&LocationToDealTo);
 
-	CardToDeal->MoveToLocation(&LocationToDealTo);
+	CardToDeal->SetToLocation(&LocationToDealFrom);
+
+	CardToDeal->DealToLocation(&LocationToDealTo);
 
 }
+
+FVector ADelaware2GameState::GetSideToSideOffset()
+{
+	FVector Offset = FVector::Zero();
+
+	switch (Dealer)
+	{
+	case EPlayers::North:
+		Offset.X = -DealingOffset.X;
+		Offset.Y = 0;
+		break;
+	case EPlayers::East:
+		Offset.Y = -DealingOffset.Y;
+		Offset.X = 0;
+		break;
+	case EPlayers::South:
+		Offset.X = DealingOffset.X;
+		Offset.Y = 0;
+		break;
+	case EPlayers::West:
+		Offset.Y = DealingOffset.Y;
+		Offset.X = 0;
+	}
+
+	Offset.Z = DealingOffset.Z;
+
+	return Offset;
+}
+
 
 void ADelaware2GameState::Reset()
 {

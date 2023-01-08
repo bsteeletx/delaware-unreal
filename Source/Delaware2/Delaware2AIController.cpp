@@ -2,7 +2,7 @@
 
 
 #include "Delaware2AIController.h"
-#include "CardActor.h"
+#include "Card.h"
 #include "Hand.h"
 
 ADelaware2AIController::ADelaware2AIController()

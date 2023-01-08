@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "Delaware2GameModeBase.h"
+#include "Delaware2GameMode.h"
 #include "Delaware2AIController.generated.h"
 
 /**

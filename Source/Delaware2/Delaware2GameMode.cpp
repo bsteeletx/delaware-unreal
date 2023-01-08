@@ -27,7 +27,7 @@ void ADelaware2GameMode::BeginPlay()
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay Function called!"));
 
 
-	for (ACard* Card : TActorRange<ACard>(GetWorld()))
+	/*for (ACard* Card : TActorRange<ACard>(GetWorld()))
 	{
 		Deck.Add(Card);
 	}
@@ -57,7 +57,7 @@ void ADelaware2GameMode::BeginPlay()
 			DealLocations.Add(EPlayers::West, Location);
 			continue;
 		}
-	}
+	}*/
 
 
 }
@@ -121,7 +121,7 @@ void ADelaware2GameMode::DealCard()
 		//have to raise the card by 0.2 and the offset by width and multiply each by the (int)(DeckCounter / 16) + (int)DeckCounter % 4 : West(DeckCounter, Z): 
 		GetDealingOffset(LocationToDealTo);
 
-	CardToDeal->MoveToLocation(&LocationToDealTo);
+	//CardToDeal->DealToLocation(&LocationToDealTo);
 
 }
 

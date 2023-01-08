@@ -4,7 +4,8 @@
 #include "Card.h"
 #include "Materials/Material.h"
 #include "Components/BoxComponent.h"
-#include "Delaware2GameModeBase.h"
+#include "Delaware2GameState.h"
+#include "Delaware2GameMode.h"
 
 // Sets default values
 ACard::ACard()
@@ -39,11 +40,7 @@ void ACard::Tick(float DeltaTime)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Card %d is off the table!!!"), GetCardID());
 	}
-	if (IsMoving)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Card %d Ultimate Location will be %s"), GetCardID(), *MoveLocation->ToString());
-		MoveToLocation(MoveLocation);
-	}
+	
 }
 
 void ACard::SetRank(ERank rank)
@@ -128,6 +125,12 @@ UMaterialInterface* ACard::GetTrump()
 	return nullptr;
 }
 
+void ACard::SetMoveDestination(FVector* destination)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Setting Destination to %s"), *destination->ToString());
+	FinalDestination = *destination;
+}
+
 ERank ACard::GetRank() const
 {
 	return Rank;
@@ -166,19 +169,45 @@ void ACard::SetToLocation(FVector* location)
 	CurrentLocation = location;
 }
 
+void ACard::DealToLocation(FVector* destination)
+{
+	//How do I give an impulse to a card to vector that points to where I want it to go, but I'm not sure where I'm starting from?
+	//I have the location
+	//I have the location of the card
+	//Vector is destination - locationOfCard
+
+	FVector CardLocation = GetActorLocation();
+
+	FVector ImpulseVector = (*destination - CardLocation)/InverseForceMultiplier; 
+
+	UE_LOG(LogTemp, Warning, TEXT("Adding Impulse to Card %d of %s"), GetCardID(), *ImpulseVector.ToString());
+	GetStaticMeshComponent()->AddImpulse(ImpulseVector);
+}
+
+
+//Tried to move them programmatically, was kind of wonky, going with physics
+/*
 void ACard::MoveToLocation(FVector* location)
 {
+	FVector Location;
+
 	if (location == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("location passed to ACard::MoveToLocation is null"));
-		return;
-	}
-	MoveLocation->Y = location->Y;
-	MoveLocation->X = location->X;
-	MoveLocation->Z = location->Z;
-	float DeltaTime = GetWorld()->GetDeltaSeconds();
+		if (MoveLocation.IsZero())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("location passed to ACard::MoveToLocation is null"));
+			return;
+		}
 
-	if (GetActorLocation() == *location)
+		Location = MoveLocation;
+	}
+	else
+	{
+		SetMoveDestination(location);
+		Location = *location;
+	}
+
+	if (GetActorLocation() == Location)
 	{
 		IsMoving = false;
 		UE_LOG(LogTemp, Warning, TEXT("Final Location Reached for Card #%d"), GetCardID());
@@ -186,17 +215,19 @@ void ACard::MoveToLocation(FVector* location)
 	}
 	else if (!IsMoving)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Attempting to move Card #%d, to its ultimate destination, %s"), GetCardID(), *MoveLocation->ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Attempting to move Card #%d, to its ultimate destination, %s"), GetCardID(), *MoveLocation.ToString());
 		IsMoving = true;
 	}
 
+	float DeltaTime = GetWorld()->GetDeltaSeconds();
 	FVector DeltaLocation(0.f);
-	DeltaLocation = *location * DeltaTime * CardMoveSpeed; //X = Value * DeltaTime * Speed
+	DeltaLocation = Location * DeltaTime * CardMoveSpeed; //X = Value * DeltaTime * Speed
 
 	UE_LOG(LogTemp, Warning, TEXT("Card #%d is at %s, trying to move it to %s for now"), GetCardID(), *GetActorLocation().ToString(), *DeltaLocation.ToString());
 	
 	AddActorWorldOffset(DeltaLocation, false, nullptr, ETeleportType::ResetPhysics);
 }
+*/
 
 void ACard::Enable()
 {
