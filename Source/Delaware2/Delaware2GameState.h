@@ -31,8 +31,8 @@ enum class EPlayers : uint8 { None = 0, North, East, South, West, All, Any };
 
 const static EPlayers AllPlayers[] = { EPlayers::North, EPlayers::East, EPlayers::South, EPlayers::West };
 
-//UENUM()
-//enum class EDealingLocations : uint8 { None = 0, Deck, Deal, Hand, All, Any };
+UENUM()
+enum class EDealingLocations : uint8 { None = 0, Deck, Deal, Hand, All, Any };
 
 USTRUCT() struct FDealLocationVectors
 {
