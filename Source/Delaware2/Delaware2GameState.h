@@ -41,12 +41,12 @@ USTRUCT() struct FDealLocationVectors
 	UPROPERTY(VisibleAnywhere)
 	FVector Locations[3];
 
-	void SetALocation(/*EDealingLocations*/int location, FVector value)
+	void SetALocation(EDealingLocations location, FVector value)
 	{
 		Locations[(int)location - 1] = value; //Skipping None
 	}
 
-	FVector GetALocation(/*EDealingLocations*/int location)
+	FVector GetALocation(EDealingLocations location)
 	{
 		return Locations[(int)location - 1];
 	}
@@ -112,7 +112,7 @@ private:
 	FVector GetSideToSideOffset();
 	void DealLocationSetup();
 	EPlayers GetDealLocationPlayer(AActor* target);
-	/*EDealingLocations*/int GetDealLocationLoc(AActor* target);
+	EDealingLocations GetDealLocationLoc(AActor* target);
 
 	UPROPERTY(EditAnywhere, Category = "Dealing")
 		FVector DealingOffset;

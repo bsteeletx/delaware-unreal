@@ -16,7 +16,7 @@ ADelaware2GameState::ADelaware2GameState()
 	DeckCounter = 0;
 	HandCounter = 0;
 
-	//DealLocations.Reserve(4);
+	DealLocations.Reserve(4);
 }
 
 void ADelaware2GameState::Tick(float DeltaTime)
@@ -64,28 +64,26 @@ void ADelaware2GameState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	/*float HeightIterator = 0;
+	float HeightIterator = 0;
+
+	DealLocationSetup();
+	Shuffle();
 
 	for (ACard* Card : TActorRange<ACard>(GetWorld()))
 	{
-		//FVector CardStartLocation = DeckStartLocations[(int)Dealer];
+		//FVector CardStartLocation = DealLocations[Dealer].GetALocation(EDealingLocations::Deck);
 		FVector CardStartLocation = FVector::Zero();
 		CardStartLocation.Z = 0.2f * HeightIterator;
-		//Card->SetToLocation(&CardStartLocation);
+		Card->SetToLocation(&CardStartLocation);
 		UE_LOG(LogTemp, Warning, TEXT("Setting Card %d to Location %s"), Card->GetCardID(), *CardStartLocation.ToString());
 		Deck.Add(Card);
 		HeightIterator++;
 	}
-
-	Shuffle();
-
-	DealLocationSetup();
-	*/
 }
 
 void ADelaware2GameState::DealLocationSetup()
 {
-	//FDealLocationVectors Locations[4];
+	FDealLocationVectors Locations[4];
 
 	TActorRange<AActor> Actors = TActorRange<AActor>(GetWorld());
 	for (AActor* Actor : Actors)
@@ -96,34 +94,31 @@ void ADelaware2GameState::DealLocationSetup()
 		
 		if (ThisPlayer != EPlayers::None)
 		{
-			/*EDealingLocations*/int ThisLocation = GetDealLocationLoc(Actor);
-		//	Locations->SetALocation(ThisLocation, Actor->GetActorLocation());
-			//UE_LOG(LogTemp, Warning, TEXT("Target Name: %s, is at %s"), *Actor->GetActorNameOrLabel(), *Locations->GetALocation(ThisLocation).ToCompactString());
+			EDealingLocations ThisLocation = GetDealLocationLoc(Actor);
+			Locations->SetALocation(ThisLocation, Actor->GetActorLocation());
+			UE_LOG(LogTemp, Warning, TEXT("Target Name: %s, is at %s"), *Actor->GetActorNameOrLabel(), *Locations->GetALocation(ThisLocation).ToCompactString());
 		}
 	}
 
 	for (int i = 0; i < 4; i++)
 	{
-		//DealLocations.Add((EPlayers)(i + 1), Locations[i]);
+		DealLocations.Add((EPlayers)(i + 1), Locations[i]);
 	}
 }
 
-/*EDealingLocations*/int ADelaware2GameState::GetDealLocationLoc(AActor* target)
+EDealingLocations ADelaware2GameState::GetDealLocationLoc(AActor* target)
 {
 	if (target->GetActorNameOrLabel().Contains(TEXT("Deal")))
 	{
-		//return EDealingLocations::Deal;
-		return 1;
+		return EDealingLocations::Deal;
 	}
 	
 	if (target->GetActorNameOrLabel().Contains(TEXT("Card")))
 	{
-		//return EDealingLocations::Hand;
-		return 2;
+		return EDealingLocations::Hand;
 	}
 
-	//return EDealingLocations::Deck;
-	return 3;
+	return EDealingLocations::Deck;
 }
 
 
@@ -185,8 +180,8 @@ void ADelaware2GameState::DealCard()
 
 	//TODO: Crashes somewhere with new code..find out where it is and try to undo it
 
-	FVector LocationToDealTo = DealLocations[PlayerToDealTo].GetALocation(/*(int)EDealingLocations::Deal*/2 - 1); //-1 because we're skipping none value
-	FVector LocationToDealFrom = DealLocations[Dealer].GetALocation(/*(int)EDealingLocations::Deal*/2 - 1);
+	FVector LocationToDealTo = DealLocations[PlayerToDealTo].GetALocation(EDealingLocations::Deal); 
+	FVector LocationToDealFrom = DealLocations[Dealer].GetALocation(EDealingLocations::Deal);
 
 	//have to raise the card by 0.2 and the offset by width and multiply each by the (int)(DeckCounter / 16) + (int)DeckCounter % 4 : West(DeckCounter, Z): 
 	GetDealingOffset(&LocationToDealTo);
