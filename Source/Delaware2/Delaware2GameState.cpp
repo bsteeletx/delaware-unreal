@@ -67,11 +67,10 @@ void ADelaware2GameState::BeginPlay()
 	float HeightIterator = 0;
 
 	DealLocationSetup();
-	Shuffle();
 
 	for (ACard* Card : TActorRange<ACard>(GetWorld()))
 	{
-		//FVector CardStartLocation = DealLocations[Dealer].GetALocation(EDealingLocations::Deck);
+		//FVector CardStartLocation = DeckStartLocations[(int)Dealer];
 		FVector CardStartLocation = FVector::Zero();
 		CardStartLocation.Z = 0.2f * HeightIterator;
 		Card->SetToLocation(&CardStartLocation);
@@ -79,6 +78,9 @@ void ADelaware2GameState::BeginPlay()
 		Deck.Add(Card);
 		HeightIterator++;
 	}
+
+	Shuffle();
+	
 }
 
 void ADelaware2GameState::DealLocationSetup()
@@ -111,14 +113,17 @@ EDealingLocations ADelaware2GameState::GetDealLocationLoc(AActor* target)
 	if (target->GetActorNameOrLabel().Contains(TEXT("Deal")))
 	{
 		return EDealingLocations::Deal;
+		//return 1;
 	}
 	
 	if (target->GetActorNameOrLabel().Contains(TEXT("Card")))
 	{
 		return EDealingLocations::Hand;
+		//return 2;
 	}
 
 	return EDealingLocations::Deck;
+	//return 3;
 }
 
 

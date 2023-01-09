@@ -90,7 +90,7 @@ private:
 
 	void SetMoveDestination(FVector* destination);
 
-	FVector GetDealOffset(EPlayers dealer);
+	//FVector GetDealOffset(EPlayers dealer);
 
 	UPROPERTY(EditAnywhere)
 	float InverseForceMultiplier = 1000.0f;

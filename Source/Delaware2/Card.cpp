@@ -17,8 +17,14 @@ ACard::ACard()
 	Back = CreateDefaultSubobject<UMaterialInterface>(TEXT("Card Back Material"));
 	TrumpFront = CreateDefaultSubobject<UMaterialInterface>(TEXT("Trump Card Front Material"));
 
+	TSubclassOf<UStaticMeshComponent> MeshComponent;
+
 	if (Back != nullptr)
+	{
 		GetStaticMeshComponent()->SetMaterial(0, Back);
+		UStaticMeshComponent* SMFront = static_cast<UStaticMeshComponent*>(GetStaticMeshComponent()->GetChildComponent(0));
+		SMFront->SetMaterial(0, Front);
+	}
 
 	SetActorLocation(FVector(0,0,0));
 }
@@ -125,11 +131,13 @@ UMaterialInterface* ACard::GetTrump()
 	return nullptr;
 }
 
+
 void ACard::SetMoveDestination(FVector* destination)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Setting Destination to %s"), *destination->ToString());
 	FinalDestination = *destination;
 }
+
 
 ERank ACard::GetRank() const
 {
