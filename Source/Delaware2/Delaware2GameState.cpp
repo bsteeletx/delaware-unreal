@@ -4,6 +4,7 @@
 #include "Delaware2GameState.h"
 #include "Card.h"
 #include "Engine/TargetPoint.h"
+#include "FDealLocationVectors.h"
 
 
 ADelaware2GameState::ADelaware2GameState()
@@ -83,12 +84,26 @@ void ADelaware2GameState::BeginPlay()
 	
 }
 
+uint8 ADelaware2GameState::GetCardDealtNumber(ACard* compare)
+{
+	uint8 CardCounter = 0;
+
+	for (int i = 0; i < GetDeckCounter(); i++)
+	{
+		if (Deck[i] == compare)
+		{
+			CardCounter++;
+		}
+	}
+
+	return CardCounter;
+}
+
 void ADelaware2GameState::DealLocationSetup()
 {
 	FDealLocationVectors Locations[4];
 
-	TActorRange<AActor> Actors = TActorRange<AActor>(GetWorld());
-	for (AActor* Actor : Actors)
+	for (AActor* Actor : TActorRange<AActor>(GetWorld()))
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Actor: %s"), *Actor->GetName());
 
@@ -98,7 +113,7 @@ void ADelaware2GameState::DealLocationSetup()
 		{
 			EDealingLocations ThisLocation = GetDealLocationLoc(Actor);
 			Locations->SetALocation(ThisLocation, Actor->GetActorLocation());
-			UE_LOG(LogTemp, Warning, TEXT("Target Name: %s, is at %s"), *Actor->GetActorNameOrLabel(), *Locations->GetALocation(ThisLocation).ToCompactString());
+			//UE_LOG(LogTemp, Warning, TEXT("Target Name: %s, is at %s"), *Actor->GetActorNameOrLabel(), *Locations->GetALocation(ThisLocation).ToCompactString());
 		}
 	}
 

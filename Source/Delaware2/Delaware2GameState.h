@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
 #include "EngineUtils.h"
+#include "FDealLocationVectors.h"
 #include "Delaware2GameState.generated.h"
+
+
 
 
 UENUM(BlueprintType)
@@ -30,35 +33,6 @@ UENUM(BlueprintType)
 enum class EPlayers : uint8 { None = 0, North, East, South, West, All, Any };
 
 const static EPlayers AllPlayers[] = { EPlayers::North, EPlayers::East, EPlayers::South, EPlayers::West };
-
-UENUM()
-enum class EDealingLocations : uint8 { None = 0, Deck, Deal, Hand, All, Any };
-
-USTRUCT() struct FDealLocationVectors
-{
-	GENERATED_BODY()
-
-	UPROPERTY(VisibleAnywhere)
-	FVector Locations[3];
-
-	void SetALocation(EDealingLocations location, FVector value)
-	{
-		Locations[(int)location - 1] = value; //Skipping None
-	}
-
-	FVector GetALocation(EDealingLocations location)
-	{
-		return Locations[(int)location - 1];
-	}
-
-	FDealLocationVectors()
-	{
-		for (FVector V : Locations)
-		{
-			V = FVector::Zero();
-		}
-	}
-};
 
 static EPlayers operator++ (EPlayers e)
 {
@@ -97,6 +71,7 @@ public:
 	EPlayers GetDealer() const;
 	void IncrementDealer();
 	void Reset();
+	uint8 GetCardDealtNumber(ACard* compare);
 
 	virtual void Tick(float DeltaTime) override;
 

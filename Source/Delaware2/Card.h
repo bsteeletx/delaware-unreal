@@ -49,6 +49,11 @@ public:
 
 private:
 
+	uint8 CreateCardID();
+	ERank GetRankFromClassName(FString className);
+	ESuit GetSuitFromClassName(FString className);
+	uint8 GetSuitRankCounter();
+
 	UFUNCTION()
 	class UMaterialInterface* GetFront();
 
