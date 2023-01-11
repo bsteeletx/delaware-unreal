@@ -18,6 +18,10 @@ ADelaware2GameState::ADelaware2GameState()
 	HandCounter = 0;
 
 	DealLocations.Reserve(4);
+
+	CardStartLocation.X = -4000;
+	CardStartLocation.Y = 3600;
+	CardStartLocation.Z = 500;
 }
 
 void ADelaware2GameState::Tick(float DeltaTime)
@@ -69,7 +73,6 @@ void ADelaware2GameState::BeginPlay()
 
 	for (ACard* Card : TActorRange<ACard>(GetWorld()))
 	{
-		FVector CardStartLocation = FVector::Zero();
 		CardStartLocation.Z = CardSpacingByDepth * HeightIterator;
 		Card->SetToLocation(&CardStartLocation);
 		Deck.Add(Card);

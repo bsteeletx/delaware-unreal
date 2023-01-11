@@ -138,6 +138,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Misc")
 		int8 HandCounter;
 
+	UPROPERTY(EditAnywhere, Category = "Misc")
+		FVector CardStartLocation;
+
 	//const FVector* DeckStartLocations[4];
 	//const FVector* DealStartLocations[4];
 
