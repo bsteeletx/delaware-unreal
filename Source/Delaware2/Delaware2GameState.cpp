@@ -36,14 +36,14 @@ void ADelaware2GameState::Tick(float DeltaTime)
 
 		if (WaitLonger)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Too soon to deal next card, DealTime is %f"), DealTime)
+			//UE_LOG(LogTemp, Warning, TEXT("Too soon to deal next card, DealTime is %f"), DealTime)
 			DealTime += DeltaTime;
 			return;
 		}
 
 		if (!WithinDeckCounterRange)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Finished Dealing"));
+			UE_LOG(LogTemp, Warning, TEXT("Finished Dealing"));
 			CurrentState = EGameStates::None; //TODO: Change to something reasonable later
 		}
 		else if (FirstCard || !NextSetOfFour) //Deal at roughly the same time
@@ -67,18 +67,16 @@ void ADelaware2GameState::BeginPlay()
 
 	float HeightIterator = 0;
 
-	DealLocationSetup();
-
 	for (ACard* Card : TActorRange<ACard>(GetWorld()))
 	{
-		//FVector CardStartLocation = DeckStartLocations[(int)Dealer];
 		FVector CardStartLocation = FVector::Zero();
-		CardStartLocation.Z = 0.2f * HeightIterator;
+		CardStartLocation.Z = CardSpacingByDepth * HeightIterator;
 		Card->SetToLocation(&CardStartLocation);
-		UE_LOG(LogTemp, Warning, TEXT("Setting Card %d to Location %s"), Card->GetCardID(), *CardStartLocation.ToString());
 		Deck.Add(Card);
 		HeightIterator++;
 	}
+
+	DealLocationSetup();
 
 	Shuffle();
 	
@@ -107,12 +105,13 @@ void ADelaware2GameState::DealLocationSetup()
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Actor: %s"), *Actor->GetName());
 
-		EPlayers ThisPlayer = GetDealLocationPlayer(Actor);
+		EPlayers ThisPlayer = GetDealLocationPlayer(Actor); //Player
 		
 		if (ThisPlayer != EPlayers::None)
 		{
-			EDealingLocations ThisLocation = GetDealLocationLoc(Actor);
-			Locations->SetALocation(ThisLocation, Actor->GetActorLocation());
+			EDealingLocations ThisLocation = GetDealLocationLoc(Actor); //Deal, Hand, or Deck
+			Locations[(int)ThisPlayer - 1].SetALocation(ThisLocation, Actor->GetActorLocation());
+			//UE_LOG(LogTemp, Warning, TEXT("Setting Location %d for Player %d"), (int)GetDealLocationLoc(Actor), (int)ThisPlayer - 1);
 			//UE_LOG(LogTemp, Warning, TEXT("Target Name: %s, is at %s"), *Actor->GetActorNameOrLabel(), *Locations->GetALocation(ThisLocation).ToCompactString());
 		}
 	}
@@ -172,12 +171,12 @@ void ADelaware2GameState::DealCard()
 		//UE_LOG(LogTemp, Warning, TEXT("%d mod 4 is 0"), DeckCounter);
 		if (DeckCounter == 0)
 		{
-			PlayerToDealTo = ++Dealer;
+			PlayerToDealTo = Dealer + 1;
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Telling system to increment PlayerToDealTo"));
-			PlayerToDealTo = ++PlayerToDealTo;
+			UE_LOG(LogTemp, Warning, TEXT("Telling system to increment PlayerToDealTo"));
+			++PlayerToDealTo;
 		}
 	}
 
@@ -189,7 +188,7 @@ void ADelaware2GameState::DealCard()
 		return;
 	}
 	
-	ACard* CardToDeal = GetNextCard();
+	ACard* CardToDeal = GetNextCard(); //DeckCounter incremented here
 	
 
 	if (DealLocations.Num() != 4)
@@ -198,15 +197,19 @@ void ADelaware2GameState::DealCard()
 		return;
 	}
 
-	//TODO: Crashes somewhere with new code..find out where it is and try to undo it
-
-	FVector LocationToDealTo = DealLocations[PlayerToDealTo].GetALocation(EDealingLocations::Deal); 
 	FVector LocationToDealFrom = DealLocations[Dealer].GetALocation(EDealingLocations::Deal);
+	FVector LocationToDealTo = DealLocations[PlayerToDealTo].GetALocation(EDealingLocations::Hand); 
 
-	//have to raise the card by 0.2 and the offset by width and multiply each by the (int)(DeckCounter / 16) + (int)DeckCounter % 4 : West(DeckCounter, Z): 
+	LocationToDealFrom.Z += DeckCounter * CardSpacingByDepth;
+
 	GetDealingOffset(&LocationToDealTo);
 
-	CardToDeal->SetToLocation(&LocationToDealFrom);
+	CardToDeal->SetToLocation(&LocationToDealFrom); 
+
+	FString DebugPlayerName = EPlayerAsString[(int)PlayerToDealTo - 1];
+	FString DebugLocationName = FDealLocationVectors::GetDealingLocationName(EDealingLocations::Hand);
+
+	UE_LOG(LogTemp, Warning, TEXT("Sending Card to %s's %s"), *DebugPlayerName, *DebugLocationName);
 
 	CardToDeal->DealToLocation(&LocationToDealTo);
 
@@ -283,11 +286,11 @@ void ADelaware2GameState::Shuffle()
 	}
 
 	//debug
-	UE_LOG(LogTemp, Warning, TEXT("DECK DUMP"))
+	/*UE_LOG(LogTemp, Warning, TEXT("DECK DUMP"))
 	for (int i = 0; i < 80; i++)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Card %d: %d"), i, Deck[i]->GetCardID());
-	}
+	}*/
 }
 
 ACard* ADelaware2GameState::GetCardByID(uint8 value)
@@ -322,7 +325,7 @@ void ADelaware2GameState::GetDealingOffset(FVector* locationToDealTo)
 
 ACard* ADelaware2GameState::GetNextCard()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Getting Next Card, DeckCounter: %d"), DeckCounter);
+	//UE_LOG(LogTemp, Warning, TEXT("Getting Next Card, DeckCounter: %d"), DeckCounter);
 	return GetCardByID(DeckCounter++);
 }
 

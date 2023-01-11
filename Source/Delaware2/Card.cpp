@@ -18,17 +18,6 @@ ACard::ACard()
 	Back = CreateDefaultSubobject<UMaterialInterface>(TEXT("Card Back Material"));
 	TrumpFront = CreateDefaultSubobject<UMaterialInterface>(TEXT("Trump Card Front Material"));
 
-	TSubclassOf<UStaticMeshComponent> MeshComponent;
-
-	if (Back != nullptr)
-	{
-		GetStaticMeshComponent()->SetMaterial(0, Back);
-		UStaticMeshComponent* SMFront = static_cast<UStaticMeshComponent*>(GetStaticMeshComponent()->GetChildComponent(0));
-		SMFront->SetMaterial(0, Front);
-	}
-
-	
-
 	SetActorLocation(FVector(0,0,0));
 }
 
@@ -39,12 +28,12 @@ void ACard::BeginPlay()
 
 	FString ClassName("");
 	GetClass()->GetName(ClassName);
-
+	/*
 	ERank ThisRank = GetRankFromClassName(ClassName);
 	ESuit ThisSuit = GetSuitFromClassName(ClassName);
 	SetRank(ThisRank);
 	SetSuit(ThisSuit);
-
+	*/
 	CardID = CreateCardID();
 
 	//UE_LOG(LogTemp, Warning, TEXT("CardID of class %s is %d"), *ClassName, CardID);
@@ -244,14 +233,10 @@ void ACard::SetToLocation(FVector* location)
 		UE_LOG(LogTemp, Warning, TEXT("location is NULL!"));
 		return;
 	}
-	FVector TempVector = FVector::Zero();
-
-	TempVector.X = location->X;
-	TempVector.Y = location->Y;
-	TempVector.Z = location->Z;
+	FVector TempVector = *location;
 
 	FString VectorLocation = TempVector.ToString();
-	UE_LOG(LogTemp, Warning, TEXT("Sending Card ID %d to: %s"), GetCardID(), *TempVector.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("Setting Location of Card ID %d to: %s"), GetCardID(), *TempVector.ToString());
 	
 	FRotator CurrentRotation = GetActorRotation();
 	SetActorEnableCollision(false);
@@ -267,11 +252,13 @@ void ACard::DealToLocation(FVector* destination)
 	//I have the location of the card
 	//Vector is destination - locationOfCard
 
+	//UE_LOG(LogTemp, Warning, TEXT("Attempting to send Card %d to %s"), GetCardID(), *destination->ToCompactString());
+
 	FVector CardLocation = GetActorLocation();
 
 	FVector ImpulseVector = (*destination - CardLocation)/InverseForceMultiplier; 
 
-	UE_LOG(LogTemp, Warning, TEXT("Adding Impulse to Card %d of %s"), GetCardID(), *ImpulseVector.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("Adding Impulse to Card %d of %s"), GetCardID(), *ImpulseVector.ToString());
 	GetStaticMeshComponent()->AddImpulse(ImpulseVector);
 }
 

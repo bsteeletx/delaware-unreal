@@ -34,7 +34,23 @@ enum class EPlayers : uint8 { None = 0, North, East, South, West, All, Any };
 
 const static EPlayers AllPlayers[] = { EPlayers::North, EPlayers::East, EPlayers::South, EPlayers::West };
 
-static EPlayers operator++ (EPlayers e)
+const static FString EPlayerAsString[] = { "North", "East", "South", "West" };
+
+static EPlayers operator+ (EPlayers const e, int value)
+{
+	int EasInt = (int)e;
+
+	EasInt += value;
+
+	while (EasInt > 4)
+	{
+		EasInt -= 4;
+	}
+
+	return (EPlayers)EasInt;
+}
+
+static EPlayers& operator++ (EPlayers& e)
 {
 	UE_LOG(LogTemp, Warning, TEXT("EPlayers Incrementer Called"));
 	if (e == EPlayers::West)
@@ -122,8 +138,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Misc")
 		int8 HandCounter;
 
-	const FVector* DeckStartLocations[4];
-	const FVector* DealStartLocations[4];
+	//const FVector* DeckStartLocations[4];
+	//const FVector* DealStartLocations[4];
 
 	//UPROPERTY(VisibleAnywhere)
 	//ADelawarePlayerState* PlayerStates[4];

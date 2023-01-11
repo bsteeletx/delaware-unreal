@@ -18,12 +18,27 @@ USTRUCT() struct FDealLocationVectors
 
 	void SetALocation(EDealingLocations location, FVector value)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Setting location %s at value %s"), *GetDealingLocationName(location), *value.ToCompactString());
 		Locations[(int)location - 1] = value; //Skipping None
 	}
 
-	FVector GetALocation(EDealingLocations location)
+	const FVector GetALocation(EDealingLocations location)
 	{
 		return Locations[(int)location - 1];
+	}
+
+	static const FString GetDealingLocationName(EDealingLocations location)
+	{
+		switch (location)
+		{
+		case EDealingLocations::None: return TEXT("None");
+		case EDealingLocations::Deck: return TEXT("Deck");
+		case EDealingLocations::Deal: return TEXT("Deal");
+		case EDealingLocations::Hand: return TEXT("Hand");
+		case EDealingLocations::All: return TEXT("All");
+		}
+
+		return TEXT("Any");
 	}
 
 	FDealLocationVectors()
