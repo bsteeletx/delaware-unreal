@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Delaware2GameMode.h"
+#include "Card.h"
 
 UENUM()
 enum class ESuitMeld : uint8 { None = 0, 

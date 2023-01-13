@@ -52,13 +52,13 @@ void ADelaware2GameState::Tick(float DeltaTime)
 		}
 		else if (FirstCard || !NextSetOfFour) //Deal at roughly the same time
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Dealing Card %d"), DeckCounter);
+			//UE_LOG(LogTemp, Warning, TEXT("Dealing Card %d"), DeckCounter);
 			DealCard();
 			DealTime += DeltaTime;
 		}
 		else if (NextSetOfFour)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Dealing to Next Player"));
+			//UE_LOG(LogTemp, Warning, TEXT("Dealing to Next Player"));
 			DealTime = 0; //reset DealTime
 			DealCard(); //temp
 		}
@@ -178,7 +178,7 @@ void ADelaware2GameState::DealCard()
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Telling system to increment PlayerToDealTo"));
+			//UE_LOG(LogTemp, Warning, TEXT("Telling system to increment PlayerToDealTo"));
 			++PlayerToDealTo;
 		}
 	}
@@ -212,8 +212,8 @@ void ADelaware2GameState::DealCard()
 	FString DebugPlayerName = EPlayerAsString[(int)PlayerToDealTo - 1];
 	FString DebugLocationName = FDealLocationVectors::GetDealingLocationName(EDealingLocations::Hand);
 
-	UE_LOG(LogTemp, Warning, TEXT("Sending Card to %s's %s"), *DebugPlayerName, *DebugLocationName);
-
+	//UE_LOG(LogTemp, Warning, TEXT("Sending Card to %s's %s"), *DebugPlayerName, *DebugLocationName);
+	CardToDeal->SetPlayerOwner(PlayerToDealTo);
 	CardToDeal->DealToLocation(&LocationToDealTo);
 
 }
@@ -303,11 +303,11 @@ ACard* ADelaware2GameState::GetCardByID(uint8 value)
 
 void ADelaware2GameState::GetDealingOffset(FVector* locationToDealTo)
 {
-	bool DealingHorizontal = (int)PlayerToDealTo % 2 == 1;
-	bool DealingReverse = (int)PlayerToDealTo % 2 == 0;
+	bool DealingHorizontal = (PlayerToDealTo == EPlayers::North || PlayerToDealTo == EPlayers::South);
+	bool DealingReverse = (PlayerToDealTo == EPlayers::North || PlayerToDealTo == EPlayers::East);
 
-	float MoveAmount = ((int)(DeckCounter / 16) + (int)DeckCounter % 4) * CardSpacing;
-	float DepthAmount = CardSpacingByDepth * ((int)(DeckCounter / 16) + (int)DeckCounter % 4);
+	float MoveAmount = ((DeckCounter / 16 * 4) + (DeckCounter % 4)) * CardSpacing; 
+	float DepthAmount = ((DeckCounter / 16 * 4) + (DeckCounter % 4)) * CardSpacingByDepth;
 
 	if (DealingReverse)
 	{

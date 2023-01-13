@@ -14,11 +14,20 @@ ACard::ACard()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	OwnedBy = EPlayers::None;
+
+	CardMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Card Mesh"));
+
+	RootComponent = CardMesh;
+
 	Front = CreateDefaultSubobject<UMaterialInterface>(TEXT("Card Front Material"));
 	Back = CreateDefaultSubobject<UMaterialInterface>(TEXT("Card Back Material"));
 	TrumpFront = CreateDefaultSubobject<UMaterialInterface>(TEXT("Trump Card Front Material"));
 
 	SetActorLocation(FVector(0,0,0));
+
+	//OnActorHit.AddDynamic(this, &OnCardHit);
+
 }
 
 // Called when the game starts or when spawned
@@ -48,7 +57,19 @@ void ACard::Tick(float DeltaTime)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Card %d is off the table!!!"), GetCardID());
 	}
+
+	if (IsMoving && HasHitPlayingArea)
+	{
+		SlowImpulse();
+	}
 	
+}
+
+void ACard::OnCardHit(AActor* selfActor, AActor* otherActor, FVector normalImpulse, const FHitResult& hit)
+{
+	if (!otherActor->GetActorNameOrLabel().Contains("TableTopActor"))
+	{
+	}
 }
 
 uint8 ACard::CreateCardID()
@@ -165,7 +186,7 @@ void ACard::ResetHeight()
 
 void ACard::Flip()
 {
-	if (IsFaceUp)
+	/*if (IsFaceUp)
 	{
 		GetStaticMeshComponent()->SetMaterial(0, Back);
 	}
@@ -179,7 +200,7 @@ void ACard::Flip()
 		{
 			GetStaticMeshComponent()->SetMaterial(0, Front);
 		}
-	}
+	}*/
 }
 
 void ACard::ToggleTrump()
@@ -202,14 +223,6 @@ UMaterialInterface* ACard::GetTrump()
 	
 	return nullptr;
 }
-
-
-void ACard::SetMoveDestination(FVector* destination)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Setting Destination to %s"), *destination->ToString());
-	FinalDestination = *destination;
-}
-
 
 ERank ACard::GetRank() const
 {
@@ -245,6 +258,46 @@ void ACard::SetToLocation(FVector* location)
 	CurrentLocation = location;
 }
 
+void ACard::SlowImpulse()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("%s of %s Hit Trigger, Owned by: %s"), *RanksAsStrings[(int)Rank - 1], *SuitsAsStrings[(int)Suit - 1], *EPlayerAsString[(int)OwnedBy - 1]);
+	if (GetVelocity().Equals(FVector::Zero(), 1.0))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Velocity of %s of %s is zero, setting to final destination..."), *RanksAsStrings[(int)Rank - 1], *SuitsAsStrings[(int)Suit - 1]); //Stops RIGHT at trigger, so add another function for when it leaves trigger, and apply this
+		SetToFinalDestination();
+		IsMoving = false;
+		
+	}
+	else
+	{
+		CardMesh->AddImpulse(-GetVelocity() / InverseForceMultiplier);
+		
+		HasHitPlayingArea = true;
+		//TODO: Slow rotation too
+	}
+}
+
+void ACard::SetToFinalDestination()
+{
+	if (FinalDestination == FVector::Zero())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Final Destination is 0!"));
+		return;
+	}
+
+	if (GetVelocity().Equals(FVector::ZeroVector), 1.0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Placing %s of %s at Final Destination, %s"), *RanksAsStrings[(int)Rank-1], *SuitsAsStrings[(int)Suit-1], *FinalDestination.ToCompactString());
+		
+		SetToLocation(&FinalDestination); 
+		SetActorRotation(FRotator::ZeroRotator);
+		//SetActorEnableCollision(false);
+		SetActorTickEnabled(false);
+	}	
+
+	//TODO: Add setting Rotation too
+}
+
 void ACard::DealToLocation(FVector* destination)
 {
 	//How do I give an impulse to a card to vector that points to where I want it to go, but I'm not sure where I'm starting from?
@@ -258,8 +311,12 @@ void ACard::DealToLocation(FVector* destination)
 
 	FVector ImpulseVector = (*destination - CardLocation)/InverseForceMultiplier; 
 
+	FinalDestination = *destination;
+	IsMoving = true;
+
 	//UE_LOG(LogTemp, Warning, TEXT("Adding Impulse to Card %d of %s"), GetCardID(), *ImpulseVector.ToString());
-	GetStaticMeshComponent()->AddImpulse(ImpulseVector);
+	CardMesh->AddImpulse(ImpulseVector);
+	//GetStaticMeshComponent()->AddImpulse(ImpulseVector);
 }
 
 
@@ -307,16 +364,13 @@ void ACard::MoveToLocation(FVector* location)
 }
 */
 
-void ACard::Enable()
+
+void ACard::SetPlayerOwner(EPlayers owner)
 {
-	//GetRootComponent()->SetComponentTickEnabled(true);
-	//GetRootComponent()->SetActive(true);
-	//SetActorEnableCollision(true);
+	OwnedBy = owner;
 }
 
-void ACard::Disable()
+EPlayers ACard::GetPlayerOwner()
 {
-	//GetRootComponent()->SetComponentTickEnabled(false);
-	//GetRootComponent()->SetActive(false);
-	//SetActorEnableCollision(false);
+	return OwnedBy;
 }

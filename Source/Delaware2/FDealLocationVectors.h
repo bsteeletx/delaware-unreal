@@ -18,7 +18,7 @@ USTRUCT() struct FDealLocationVectors
 
 	void SetALocation(EDealingLocations location, FVector value)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Setting location %s at value %s"), *GetDealingLocationName(location), *value.ToCompactString());
+		//UE_LOG(LogTemp, Warning, TEXT("Setting location %s at value %s"), *GetDealingLocationName(location), *value.ToCompactString());
 		Locations[(int)location - 1] = value; //Skipping None
 	}
 

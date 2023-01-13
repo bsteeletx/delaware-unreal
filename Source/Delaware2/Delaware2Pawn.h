@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "Delaware2GameState.h"
+#include "Card.h"
 #include "Delaware2Pawn.generated.h"
 
 UCLASS()

@@ -9,18 +9,6 @@
 #include "Delaware2GameState.generated.h"
 
 
-
-
-UENUM(BlueprintType)
-enum class ERank : uint8 { None = 0, Jack, Queen, King, Ten, Ace, All, Any };
-
-const static ERank AllRanks[] = { ERank::Jack, ERank::Queen, ERank::King, ERank::Ten, ERank::Ace };
-
-UENUM(BlueprintType)
-enum class ESuit : uint8 { None = 0, Diamonds, Clubs, Hearts, Spades, All, Any };
-
-const static ESuit AllSuits[] = { ESuit::Diamonds, ESuit::Clubs,  ESuit::Hearts, ESuit::Spades };
-
 UENUM(BlueprintType)
 enum class EGameStates : uint8 {
 	None = 0,
@@ -52,16 +40,16 @@ static EPlayers operator+ (EPlayers const e, int value)
 
 static EPlayers& operator++ (EPlayers& e)
 {
-	UE_LOG(LogTemp, Warning, TEXT("EPlayers Incrementer Called"));
+	//UE_LOG(LogTemp, Warning, TEXT("EPlayers Incrementer Called"));
 	if (e == EPlayers::West)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Last Player was WEST, setting to North"));
+		//UE_LOG(LogTemp, Warning, TEXT("Last Player was WEST, setting to North"));
 		e = EPlayers::North;
 		return e;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Incrementing PlayerToDealTo"));
+		//UE_LOG(LogTemp, Warning, TEXT("Incrementing PlayerToDealTo"));
 		e = (EPlayers)((int)e + 1);
 		return e;
 	}
