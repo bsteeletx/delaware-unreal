@@ -26,7 +26,7 @@ ACard::ACard()
 
 	SetActorLocation(FVector(0,0,0));
 
-	//OnActorHit.AddDynamic(this, &OnCardHit);
+	//OnActorHit.AddDynamic(this, &ACard::OnCardHit);
 
 }
 
@@ -57,19 +57,41 @@ void ACard::Tick(float DeltaTime)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Card %d is off the table!!!"), GetCardID());
 	}
-
-	if (IsMoving && HasHitPlayingArea)
-	{
-		SlowImpulse();
-	}
 	
+	FRotator CurrentRotation = GetActorRotation();
+	if (!IsFaceUp)
+	{
+		CurrentRotation.ClampAxis(33.0);
+	}
+
+	ADelaware2GameState* GameState = static_cast<ADelaware2GameState*>(GetWorld()->GetGameState());
+
+	if (GameState != nullptr)
+	{
+		if (GameState->GetCurrentState() == EGameStates::Dealing)
+		{
+			if (GetVelocity().IsNearlyZero() && HasHitPlayingArea && !HasBeenPlacedInPlayingArea)
+			{
+				SetToFinalDestination();
+			}
+		}
+	}
 }
 
-void ACard::OnCardHit(AActor* selfActor, AActor* otherActor, FVector normalImpulse, const FHitResult& hit)
+FString ACard::GetRankAsString() const
 {
-	if (!otherActor->GetActorNameOrLabel().Contains("TableTopActor"))
-	{
-	}
+	return RanksAsStrings[(int)GetRank()-1];
+}
+
+FString ACard::GetSuitAsString() const
+{
+	return SuitsAsStrings[(int)GetSuit() - 1];
+}
+
+FString ACard::GetFullCardName() const
+{
+	FString Name = GetRankAsString() + " of " + GetSuitAsString();
+	return Name;
 }
 
 uint8 ACard::CreateCardID()
@@ -239,42 +261,43 @@ uint8 ACard::GetCardID() const
 	return CardID;
 }
 
-void ACard::SetToLocation(FVector* location)
+void ACard::SetToLocation(FVector* location, bool useRotation, FRotator rotation)
 {
 	if (location == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("location is NULL!"));
 		return;
 	}
-	FVector TempVector = *location;
-
-	FString VectorLocation = TempVector.ToString();
-	//UE_LOG(LogTemp, Warning, TEXT("Setting Location of Card ID %d to: %s"), GetCardID(), *TempVector.ToString());
 	
-	FRotator CurrentRotation = GetActorRotation();
-	SetActorEnableCollision(false);
-	TeleportTo(*location, CurrentRotation);
-	SetActorEnableCollision(true);
-	CurrentLocation = location;
+	FRotator CurrentRotation = FRotator(0, 0, 0);
+	if (!useRotation)
+	{
+		ADelaware2GameState* GameState = static_cast<ADelaware2GameState*>(GetWorld()->GetGameState());
+		if (GameState->GetDealer() == EPlayers::East || GameState->GetDealer() == EPlayers::West)
+		{
+			CurrentRotation = FRotator(0, 0, 90);
+		}
+	}
+	else
+	{
+		CurrentRotation = rotation;
+	}
+	
+	const FVector NewLocation = *location;
+	if (!SetActorLocation(NewLocation))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s was unable to be placed at %s! Placing at %s instead"), *GetFullCardName(), *NewLocation.ToCompactString(), *GetActorLocation().ToCompactString());
+	}
+
+	//SetActorEnableCollision(true);
 }
 
 void ACard::SlowImpulse()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("%s of %s Hit Trigger, Owned by: %s"), *RanksAsStrings[(int)Rank - 1], *SuitsAsStrings[(int)Suit - 1], *EPlayerAsString[(int)OwnedBy - 1]);
-	if (GetVelocity().Equals(FVector::Zero(), 1.0))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Velocity of %s of %s is zero, setting to final destination..."), *RanksAsStrings[(int)Rank - 1], *SuitsAsStrings[(int)Suit - 1]); //Stops RIGHT at trigger, so add another function for when it leaves trigger, and apply this
-		SetToFinalDestination();
-		IsMoving = false;
+	//UE_LOG(LogTemp, Warning, TEXT("Card Class Stopping Impulse..."));
+	CardMesh->AddImpulse(-GetVelocity() / InverseForceMultiplier / 2);
 		
-	}
-	else
-	{
-		CardMesh->AddImpulse(-GetVelocity() / InverseForceMultiplier);
-		
-		HasHitPlayingArea = true;
-		//TODO: Slow rotation too
-	}
+	HasHitPlayingArea = true;
 }
 
 void ACard::SetToFinalDestination()
@@ -287,83 +310,45 @@ void ACard::SetToFinalDestination()
 
 	if (GetVelocity().Equals(FVector::ZeroVector), 1.0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Placing %s of %s at Final Destination, %s"), *RanksAsStrings[(int)Rank-1], *SuitsAsStrings[(int)Suit-1], *FinalDestination.ToCompactString());
-		
+		//UE_LOG(LogTemp, Warning, TEXT("Placing %s of %s at Final Destination, %s"), *RanksAsStrings[(int)Rank-1], *SuitsAsStrings[(int)Suit-1], *FinalDestination.ToCompactString());
+		FRotator Rotation;
+		if (GetPlayerOwner() == EPlayers::North || GetPlayerOwner() == EPlayers::South)
+		{
+			Rotation = FRotator::ZeroRotator;
+		}
+		else
+		{
+			Rotation = FRotator(0, 90, 0);
+		}
+		//UE_LOG(LogTemp, Warning, TEXT("Rotation is set to %s"), *Rotation.ToCompactString());
+		SetActorRotation(Rotation);
 		SetToLocation(&FinalDestination); 
-		SetActorRotation(FRotator::ZeroRotator);
-		//SetActorEnableCollision(false);
 		SetActorTickEnabled(false);
-	}	
+		HasHitPlayingArea = false;
+		HasBeenPlacedInPlayingArea = true;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Velocity is NOT zero!"));
+	}
 
 	//TODO: Add setting Rotation too
 }
 
 void ACard::DealToLocation(FVector* destination)
 {
-	//How do I give an impulse to a card to vector that points to where I want it to go, but I'm not sure where I'm starting from?
-	//I have the location
-	//I have the location of the card
-	//Vector is destination - locationOfCard
-
-	//UE_LOG(LogTemp, Warning, TEXT("Attempting to send Card %d to %s"), GetCardID(), *destination->ToCompactString());
+	//UE_LOG(LogTemp, Warning, TEXT("Attempting to send %s to %s"), *GetFullCardName(), *destination->ToCompactString());
 
 	FVector CardLocation = GetActorLocation();
 
 	FVector ImpulseVector = (*destination - CardLocation)/InverseForceMultiplier; 
 
 	FinalDestination = *destination;
-	IsMoving = true;
 
-	//UE_LOG(LogTemp, Warning, TEXT("Adding Impulse to Card %d of %s"), GetCardID(), *ImpulseVector.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("Adding Impulse to %s of %s"), *GetFullCardName(), *ImpulseVector.ToString());
 	CardMesh->AddImpulse(ImpulseVector);
 	//GetStaticMeshComponent()->AddImpulse(ImpulseVector);
 }
-
-
-//Tried to move them programmatically, was kind of wonky, going with physics
-/*
-void ACard::MoveToLocation(FVector* location)
-{
-	FVector Location;
-
-	if (location == nullptr)
-	{
-		if (MoveLocation.IsZero())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("location passed to ACard::MoveToLocation is null"));
-			return;
-		}
-
-		Location = MoveLocation;
-	}
-	else
-	{
-		SetMoveDestination(location);
-		Location = *location;
-	}
-
-	if (GetActorLocation() == Location)
-	{
-		IsMoving = false;
-		UE_LOG(LogTemp, Warning, TEXT("Final Location Reached for Card #%d"), GetCardID());
-		return;
-	}
-	else if (!IsMoving)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Attempting to move Card #%d, to its ultimate destination, %s"), GetCardID(), *MoveLocation.ToString());
-		IsMoving = true;
-	}
-
-	float DeltaTime = GetWorld()->GetDeltaSeconds();
-	FVector DeltaLocation(0.f);
-	DeltaLocation = Location * DeltaTime * CardMoveSpeed; //X = Value * DeltaTime * Speed
-
-	UE_LOG(LogTemp, Warning, TEXT("Card #%d is at %s, trying to move it to %s for now"), GetCardID(), *GetActorLocation().ToString(), *DeltaLocation.ToString());
-	
-	AddActorWorldOffset(DeltaLocation, false, nullptr, ETeleportType::ResetPhysics);
-}
-*/
-
 
 void ACard::SetPlayerOwner(EPlayers owner)
 {

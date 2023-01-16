@@ -6,7 +6,6 @@
 #include "Engine/TargetPoint.h"
 #include "FDealLocationVectors.h"
 
-
 ADelaware2GameState::ADelaware2GameState()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -20,7 +19,7 @@ ADelaware2GameState::ADelaware2GameState()
 	DealLocations.Reserve(4);
 
 	CardStartLocation.X = -4000;
-	CardStartLocation.Y = 3600;
+	CardStartLocation.Y = 4800;
 	CardStartLocation.Z = 500;
 }
 
@@ -35,7 +34,7 @@ void ADelaware2GameState::Tick(float DeltaTime)
 		//UE_LOG(LogTemp, Warning, TEXT("Dealing State!"));
 		const bool WithinDeckCounterRange = (DeckCounter < 80 && DeckCounter >= 0); //DeckCounter is incremented in GetNextCard
 		const bool WaitLonger = DealTime < DealDelay;
-		const bool NextSetOfFour = DeckCounter % 4 == 0;
+		const bool NextSetOfFour = (DeckCounter + 1) % 4 == 0;
 		const bool FirstCard = DeckCounter == 0;
 
 		if (WaitLonger)
@@ -54,12 +53,13 @@ void ADelaware2GameState::Tick(float DeltaTime)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Dealing Card %d"), DeckCounter);
 			DealCard();
+			//UE_LOG(LogTemp, Warning, TEXT("Adding %fl to DealTime %fl"), DeltaTime, DealTime)
 			DealTime += DeltaTime;
 		}
 		else if (NextSetOfFour)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Dealing to Next Player"));
-			DealTime = 0; //reset DealTime
+			//UE_LOG(LogTemp, Warning, TEXT("Dealing to Next Player, setting DealTime %fl to -%fl"), DealTime, -4*DealDelay);
+			DealTime = -4*DealDelay; //reset DealTime, giving extra time between players
 			DealCard(); //temp
 		}
 	}
@@ -69,12 +69,14 @@ void ADelaware2GameState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	float HeightIterator = 0;
+	float HeightIterator = 1;
 
 	for (ACard* Card : TActorRange<ACard>(GetWorld()))
 	{
-		CardStartLocation.Z = CardSpacingByDepth * HeightIterator;
+		CardStartLocation.Z += (CardSpacingByDepth * HeightIterator);
+		UE_LOG(LogTemp, Warning, TEXT("Starting %s at %s"), *Card->GetFullCardName(), *CardStartLocation.ToCompactString());
 		Card->SetToLocation(&CardStartLocation);
+		Card->SetActorRotation(FRotator::ZeroRotator);
 		Deck.Add(Card);
 		HeightIterator++;
 	}
@@ -192,15 +194,16 @@ void ADelaware2GameState::DealCard()
 	}
 	
 	ACard* CardToDeal = GetNextCard(); //DeckCounter incremented here
-	
+	FVector LocationToDealFrom = DealLocations[Dealer].GetALocation(EDealingLocations::Deal);
+	CardToDeal->SetToLocation(&LocationToDealFrom);
+	UE_LOG(LogTemp, Warning, TEXT("Adding Card %s to deal"), *CardToDeal->GetFullCardName())
 
 	if (DealLocations.Num() != 4)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("DealLocations TMap not set!"));
 		return;
 	}
-
-	FVector LocationToDealFrom = DealLocations[Dealer].GetALocation(EDealingLocations::Deal);
+	
 	FVector LocationToDealTo = DealLocations[PlayerToDealTo].GetALocation(EDealingLocations::Hand); 
 
 	LocationToDealFrom.Z += DeckCounter * CardSpacingByDepth;
@@ -217,35 +220,6 @@ void ADelaware2GameState::DealCard()
 	CardToDeal->DealToLocation(&LocationToDealTo);
 
 }
-
-FVector ADelaware2GameState::GetSideToSideOffset()
-{
-	FVector Offset = FVector::Zero();
-
-	switch (Dealer)
-	{
-	case EPlayers::North:
-		Offset.X = -DealingOffset.X;
-		Offset.Y = 0;
-		break;
-	case EPlayers::East:
-		Offset.Y = -DealingOffset.Y;
-		Offset.X = 0;
-		break;
-	case EPlayers::South:
-		Offset.X = DealingOffset.X;
-		Offset.Y = 0;
-		break;
-	case EPlayers::West:
-		Offset.Y = DealingOffset.Y;
-		Offset.X = 0;
-	}
-
-	Offset.Z = DealingOffset.Z;
-
-	return Offset;
-}
-
 
 void ADelaware2GameState::Reset()
 {
@@ -307,11 +281,20 @@ void ADelaware2GameState::GetDealingOffset(FVector* locationToDealTo)
 	bool DealingReverse = (PlayerToDealTo == EPlayers::North || PlayerToDealTo == EPlayers::East);
 
 	float MoveAmount = ((DeckCounter / 16 * 4) + (DeckCounter % 4)) * CardSpacing; 
-	float DepthAmount = ((DeckCounter / 16 * 4) + (DeckCounter % 4)) * CardSpacingByDepth;
+	float DepthAmount = ((DeckCounter / 16 * 4) + (DeckCounter % 4)) * CardSpacingByDepth + CardSpacingByDepth;
 
 	if (DealingReverse)
 	{
 		MoveAmount = -MoveAmount;
+	}
+
+	if (PlayerToDealTo == EPlayers::South)
+	{
+		MoveAmount *= 2;
+	}
+	else if (PlayerToDealTo != EPlayers::North)
+	{
+		MoveAmount /= 2;
 	}
 
 	if (DealingHorizontal)
@@ -332,7 +315,7 @@ ACard* ADelaware2GameState::GetNextCard()
 	return GetCardByID(DeckCounter++);
 }
 
-EPlayers ADelaware2GameState::GetDealer() const
+EPlayers ADelaware2GameState::GetDealer()
 {
 	return Dealer;
 }
@@ -342,7 +325,7 @@ void ADelaware2GameState::IncrementDealer()
 	++Dealer;
 }
 
-EGameStates ADelaware2GameState::GetCurrentState() const
+EGameStates ADelaware2GameState::GetCurrentState()
 {
 	return CurrentState;
 }

@@ -52,13 +52,16 @@ public:
 	EPlayers GetPlayerOwner();
 	ERank GetRank() const;
 	ESuit GetSuit() const;
+	FString GetRankAsString() const;
+	FString GetSuitAsString() const;
+	FString GetFullCardName() const;
 
 	void RaiseHeight();
 	void ResetHeight();
 
 	void SetPlayerOwner(EPlayers player);
 	void SetToFinalDestination();
-	void SetToLocation(FVector* location);
+	void SetToLocation(FVector* location, bool useRotation = false, FRotator rotation = FRotator::ZeroRotator);
 	void SlowImpulse();
 
 	void ToggleTrump();
@@ -76,10 +79,7 @@ private:
 	UFUNCTION()
 	class UMaterialInterface* GetTrump();
 
-	UFUNCTION()
-	void OnCardHit(AActor* selfActor, AActor* otherActor, FVector NormalImpulse, const FHitResult& Hit);
-
-
+	//////////////////////////////////
 
 	UPROPERTY(EditAnywhere)
 	class UMaterialInterface* Front;
@@ -105,17 +105,13 @@ private:
 	UPROPERTY(EditAnywhere)
 	float CardMoveSpeed = 25.f;
 
-	bool IsMoving = false;
 	bool IsTrumpSuit = false;
 	bool IsFaceUp = false;
 	bool IsRaised = false;
 	bool HasHitPlayingArea = false;
-
-	FVector* CurrentLocation;
+	bool HasBeenPlacedInPlayingArea = false;
 
 	FVector FinalDestination = { 0.0, 0.0, 0.0 };
-
-	//FVector GetDealOffset(EPlayers dealer);
 
 	UPROPERTY(EditAnywhere)
 	float InverseForceMultiplier = 5.f;

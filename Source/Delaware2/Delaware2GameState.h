@@ -68,11 +68,11 @@ public:
 	void SetDeckCounter(const uint8 counter);
 	uint8 GetDeckCounter() const;
 
-	EGameStates GetCurrentState() const;
+	EGameStates GetCurrentState();
 
 	class ACard* GetNextCard();
 
-	EPlayers GetDealer() const;
+	EPlayers GetDealer();
 	void IncrementDealer();
 	void Reset();
 	uint8 GetCardDealtNumber(ACard* compare);
@@ -88,10 +88,10 @@ private:
 	void DealCard();
 	void Shuffle();
 	class ACard* GetCardByID(uint8 value);
-	FVector GetSideToSideOffset();
 	void DealLocationSetup();
 	EPlayers GetDealLocationPlayer(AActor* target);
 	EDealingLocations GetDealLocationLoc(AActor* target);
+	//TODO: Add a Player class so that I can add a Hand to it so I can add cards to the players' hands
 
 	UPROPERTY(EditAnywhere, Category = "Dealing")
 		FVector DealingOffset;
@@ -102,7 +102,7 @@ private:
 	float DealTime = 500;
 
 	UPROPERTY(EditAnywhere, Category = "State Handling")
-		EGameStates CurrentState;
+	EGameStates CurrentState;
 
 	UPROPERTY(VisibleAnywhere, Category = "Dealing")
 		TMap<EPlayers, FDealLocationVectors> DealLocations;
@@ -116,7 +116,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Dealing")
 		TArray<ACard*> Deck;
 
-
+	UPROPERTY(VisibleAnywhere, Category = "Dealing")
 	EPlayers Dealer;
 
 	EPlayers PlayerToDealTo;
