@@ -310,7 +310,7 @@ void ACard::SetToFinalDestination()
 
 	if (GetVelocity().Equals(FVector::ZeroVector), 1.0)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Placing %s of %s at Final Destination, %s"), *RanksAsStrings[(int)Rank-1], *SuitsAsStrings[(int)Suit-1], *FinalDestination.ToCompactString());
+		UE_LOG(LogTemp, Warning, TEXT("Placing %s of %s at Final Destination, %s"), *RanksAsStrings[(int)Rank-1], *SuitsAsStrings[(int)Suit-1], *FinalDestination.ToCompactString());
 		FRotator Rotation;
 		if (GetPlayerOwner() == EPlayers::North || GetPlayerOwner() == EPlayers::South)
 		{
@@ -323,6 +323,7 @@ void ACard::SetToFinalDestination()
 		//UE_LOG(LogTemp, Warning, TEXT("Rotation is set to %s"), *Rotation.ToCompactString());
 		SetActorRotation(Rotation);
 		SetToLocation(&FinalDestination); 
+		//SetActorEnableCollision(false);
 		SetActorTickEnabled(false);
 		HasHitPlayingArea = false;
 		HasBeenPlacedInPlayingArea = true;

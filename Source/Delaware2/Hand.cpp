@@ -69,20 +69,28 @@ uint8 Hand::GetNumberOfCardsOfType(ERank rank, ESuit suit)
 	return NumberOfCards;
 }
 
-void Hand::RemoveCard(ACard* toRemove)
+ACard* Hand::RemoveCard(ACard* toRemove)
 {
-	if (HasCard(toRemove))
+	ACard* ReturningCard = nullptr;
+	int IndexLocation = HasCard(toRemove);
+
+	if (IndexLocation != INDEX_NONE)
 	{
-		Cards.Remove(toRemove);
+		ReturningCard = Cards[IndexLocation];
+		Cards.RemoveAt(IndexLocation);
 	}
+
+	return ReturningCard;
 }
 
-bool Hand::HasCard(ACard* toFind)
+int Hand::HasCard(ACard* toFind)
 {
 	if (Cards.Find(toFind) != INDEX_NONE)
-		return true;
-
-	return false;
+	{
+		return Cards.Find(toFind);
+	}
+	
+	return INDEX_NONE;
 }
 
 void Hand::AddCard(ACard* toAdd)

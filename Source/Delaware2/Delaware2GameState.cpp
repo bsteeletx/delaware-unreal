@@ -5,6 +5,7 @@
 #include "Card.h"
 #include "Engine/TargetPoint.h"
 #include "FDealLocationVectors.h"
+#include "Delaware2PlayerState.h"
 
 ADelaware2GameState::ADelaware2GameState()
 {
@@ -74,7 +75,7 @@ void ADelaware2GameState::BeginPlay()
 	for (ACard* Card : TActorRange<ACard>(GetWorld()))
 	{
 		CardStartLocation.Z += (CardSpacingByDepth * HeightIterator);
-		UE_LOG(LogTemp, Warning, TEXT("Starting %s at %s"), *Card->GetFullCardName(), *CardStartLocation.ToCompactString());
+		//UE_LOG(LogTemp, Warning, TEXT("Starting %s at %s"), *Card->GetFullCardName(), *CardStartLocation.ToCompactString());
 		Card->SetToLocation(&CardStartLocation);
 		Card->SetActorRotation(FRotator::ZeroRotator);
 		Deck.Add(Card);
@@ -196,7 +197,7 @@ void ADelaware2GameState::DealCard()
 	ACard* CardToDeal = GetNextCard(); //DeckCounter incremented here
 	FVector LocationToDealFrom = DealLocations[Dealer].GetALocation(EDealingLocations::Deal);
 	CardToDeal->SetToLocation(&LocationToDealFrom);
-	UE_LOG(LogTemp, Warning, TEXT("Adding Card %s to deal"), *CardToDeal->GetFullCardName())
+	//UE_LOG(LogTemp, Warning, TEXT("Adding Card %s to deal"), *CardToDeal->GetFullCardName())
 
 	if (DealLocations.Num() != 4)
 	{

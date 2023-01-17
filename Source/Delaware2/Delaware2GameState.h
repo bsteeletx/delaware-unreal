@@ -91,6 +91,7 @@ private:
 	void DealLocationSetup();
 	EPlayers GetDealLocationPlayer(AActor* target);
 	EDealingLocations GetDealLocationLoc(AActor* target);
+	class ADelaware2PlayerState* PlayerStates[4];
 	//TODO: Add a Player class so that I can add a Hand to it so I can add cards to the players' hands
 
 	UPROPERTY(EditAnywhere, Category = "Dealing")

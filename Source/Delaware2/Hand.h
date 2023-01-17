@@ -81,15 +81,17 @@ public:
 	Hand();
 	~Hand();
 
-	void Reset();
+
 	void AddCard(class ACard* toAdd);
-	bool HasCard(ACard* cardToFind);
-	void RemoveCard(ACard* toRemove);
 	uint8 GetNumberOfCardsOfType(ERank rank, ESuit suit);
 	uint8 GetSize();
-	void Sort();
 	bool HasMarriageIn(ESuit suit);
-
+	void CalculateMeld();
+	int HasCard(ACard* cardToFind);
+	ACard* RemoveCard(ACard* toRemove);
+	void Reset();
+	void Sort();
+	
 	bool HasRoundRobin;
 	bool HasDoubleRun;
 
@@ -103,7 +105,6 @@ private:
 	void SetRoundRobinFlag();
 	void SetRunsInHand();
 	uint8 GetRunSize(ESuit suit);
-	void CalculateMeld();
 	uint8 GetSuitValue(ESuit suit);
 	TArray<class ACard*> GetAllCardsOfSuit(ESuit suit);
 	uint8 GetNumberOfAces();

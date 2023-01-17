@@ -54,7 +54,7 @@ void APlayingArea::OnOverlapBegin(AActor* overlappedActor, AActor* otherActor)
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("CardOwner is %s NameOfPlayingArea is %s"), *EPlayerAsString[(int)CardOwner - 1], *NameOfPlayingArea);
+			//UE_LOG(LogTemp, Warning, TEXT("CardOwner is %s NameOfPlayingArea is %s"), *EPlayerAsString[(int)CardOwner - 1], *NameOfPlayingArea);
 		}
 	}
 }
