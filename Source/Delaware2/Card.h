@@ -34,12 +34,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void SetRank(ERank rank);
-	void SetSuit(ESuit suit);
-
 	//ACard(char suitNumber, char rankNumber);
-	uint8 GetCardID() const;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -47,8 +42,11 @@ protected:
 public:	
 
 	void DealToLocation(FVector* destination);
-	void Flip();
 	
+	void Flip();
+
+	uint8 GetCardID() const;
+	FVector* GetFinalDestination();
 	EPlayers GetPlayerOwner();
 	ERank GetRank() const;
 	ESuit GetSuit() const;
@@ -58,10 +56,14 @@ public:
 
 	void RaiseHeight();
 	void ResetHeight();
+	void Rotate90();
 
+	void SetCollision(bool enableCollision);
+	void SetPhysics(bool enablePhysics);
 	void SetPlayerOwner(EPlayers player);
-	void SetToFinalDestination();
-	void SetToLocation(FVector* location, bool useRotation = false, FRotator rotation = FRotator::ZeroRotator);
+	void SetRank(ERank rank);
+	void SetSuit(ESuit suit);
+	void SetToLocation(FVector* location, bool useCurrentRotation = false, FRotator rotation = FRotator::ZeroRotator);
 	void SlowImpulse();
 
 	void ToggleTrump();
@@ -108,8 +110,8 @@ private:
 	bool IsTrumpSuit = false;
 	bool IsFaceUp = false;
 	bool IsRaised = false;
-	bool HasHitPlayingArea = false;
-	bool HasBeenPlacedInPlayingArea = false;
+	bool HitPlayArea = false;
+	bool HasFiredSort = false;
 
 	FVector FinalDestination = { 0.0, 0.0, 0.0 };
 

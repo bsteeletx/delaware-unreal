@@ -12,8 +12,11 @@
 UENUM(BlueprintType)
 enum class EGameStates : uint8 {
 	None = 0,
-	Dealing
-}; ////Loading, Menu, Options, Start?, InGameMenu, InGameOptions?, / Animation, Sorting ?
+	Dealing,
+	Sorting, //Update operator when adding another state
+	All,
+	Any
+}; ////Loading, Menu, Options, Start?, InGameMenu, InGameOptions?, / Animation,
 //Bidding,
 //ShowingMeld,
 
@@ -23,6 +26,20 @@ enum class EPlayers : uint8 { None = 0, North, East, South, West, All, Any };
 const static EPlayers AllPlayers[] = { EPlayers::North, EPlayers::East, EPlayers::South, EPlayers::West };
 
 const static FString EPlayerAsString[] = { "North", "East", "South", "West" };
+
+static EGameStates& operator++ (EGameStates& e)
+{
+	if (e == EGameStates::Sorting)
+	{
+		e = EGameStates::None;
+	}
+	else
+	{
+		e = (EGameStates)((int)e + 1);
+	}
+
+	return e;
+}
 
 static EPlayers operator+ (EPlayers const e, int value)
 {
@@ -65,18 +82,23 @@ class DELAWARE2_API ADelaware2GameState : public AGameState
 public:
 	ADelaware2GameState();
 
-	void SetDeckCounter(const uint8 counter);
-	uint8 GetDeckCounter() const;
+	void CardReadyToSort(EPlayers owner);
 
+	uint8 GetCardDealtNumber(class ACard* compare);
 	EGameStates GetCurrentState();
-
-	class ACard* GetNextCard();
-
 	EPlayers GetDealer();
-	void IncrementDealer();
-	void Reset();
-	uint8 GetCardDealtNumber(ACard* compare);
+	FVector GetDealLocation(EPlayers toDealTo);
+	uint8 GetDeckCounter() const;
+	ACard* GetNextCard();
+	EPlayers GetPlayerToDealTo() const;
+	static FString EPlayersToString(EPlayers player);
+	static uint8 Atoi(FString string);
 
+	void InitPlayer(EPlayers player, class ADelaware2Pawn* pawn);
+	void IncrementDealer();
+	void PlayerHandSorted(EPlayers playerHandIsSorted);
+	void Reset();
+	void SetDeckCounter(const uint8 counter);
 	virtual void Tick(float DeltaTime) override;
 
 protected:
@@ -84,15 +106,18 @@ protected:
 	virtual void BeginPlay() override;
 	
 private:
-	void GetDealingOffset(FVector* locationToDealTo);
 	void DealCard();
-	void Shuffle();
-	class ACard* GetCardByID(uint8 value);
 	void DealLocationSetup();
-	EPlayers GetDealLocationPlayer(AActor* target);
+
+	class ACard* GetCardByID(uint8 value);
 	EDealingLocations GetDealLocationLoc(AActor* target);
+	EPlayers GetDealLocationPlayer(AActor* target);
+	uint8 GetDealingLocationIndex(AActor* target);
+
+	void Shuffle();
+
 	class ADelaware2PlayerState* PlayerStates[4];
-	//TODO: Add a Player class so that I can add a Hand to it so I can add cards to the players' hands
+	//class UHandActorComponent* PlayerHands[4];
 
 	UPROPERTY(EditAnywhere, Category = "Dealing")
 		FVector DealingOffset;
@@ -130,11 +155,14 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Misc")
 		FVector CardStartLocation;
 
-	//const FVector* DeckStartLocations[4];
-	//const FVector* DealStartLocations[4];
+	uint8 SortedHands = 0;
 
-	//UPROPERTY(VisibleAnywhere)
-	//ADelawarePlayerState* PlayerStates[4];
+	UPROPERTY(VisibleAnywhere)
+	class ADelaware2Pawn* Players[4];
+
+	bool PlayersInitialized[4] = { false, false, false, false };
+
+	uint8 CardsReadyForSorting[4] = { 0 };
 
 	//TMap<EPlayers, uint64> PlayerIDs; //give each player a random ID #, map it to their Enum Key--Later when adding multiplayer
 

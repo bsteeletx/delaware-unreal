@@ -6,25 +6,80 @@
 #include "FDealLocationVectors.generated.h"
 
 UENUM()
-enum class EDealingLocations : uint8 { None = 0, Deck, Deal, Hand, All, Any };
+enum class EDealingLocations : uint8 { None = 0, Deck, DealFrom, DealTo, All, Any };
 
 
 USTRUCT() struct FDealLocationVectors
 {
 	GENERATED_BODY()
 
-		UPROPERTY(VisibleAnywhere)
-		FVector Locations[3];
+	FVector DeckLocation;
+	FVector DealFromLocation;
+	FVector DealToHandLocations[20];
 
 	void SetALocation(EDealingLocations location, FVector value)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Setting location %s at value %s"), *GetDealingLocationName(location), *value.ToCompactString());
-		Locations[(int)location - 1] = value; //Skipping None
+		if (location == EDealingLocations::Deck)
+		{
+			DeckLocation = value; 
+		}
+		else if (location == EDealingLocations::DealFrom)
+		{
+			DealFromLocation = value;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Invalid location in FDealLocationVectors->SetALocation"));
+		}
+	}
+
+	void SetALocation(EDealingLocations location, int indexValue, FVector value)
+	{
+		if (location == EDealingLocations::DealTo)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Setting Player %d's DealTo, index %d to %s"), (int)location, indexValue, *value.ToCompactString());
+			DealToHandLocations[indexValue] = value;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Invalid location in FDealLocationVectors->SetALocation 2"));
+		}
 	}
 
 	const FVector GetALocation(EDealingLocations location)
 	{
-		return Locations[(int)location - 1];
+		if (location == EDealingLocations::Deck)
+		{
+			return DeckLocation;
+		}
+		else if (location == EDealingLocations::DealFrom)
+		{
+			return DealFromLocation;
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("invalid location in FDealLocationVectors->GetALocation"));
+
+		return FVector::Zero();
+	}
+
+	const FVector GetALocation(EDealingLocations location, int index)
+	{
+		if (location == EDealingLocations::DealTo)
+		{
+			if (index >= 0)
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("Index for Getting a location is: %d"), index);
+				return DealToHandLocations[index];
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("index paramter is less than zero in FDealLocationVectors->GetALocation"));
+			}
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("invalid location in FDealLocationVectors->GetALocation"));
+
+		return FVector::Zero();
 	}
 
 	static const FString GetDealingLocationName(EDealingLocations location)
@@ -33,8 +88,8 @@ USTRUCT() struct FDealLocationVectors
 		{
 		case EDealingLocations::None: return TEXT("None");
 		case EDealingLocations::Deck: return TEXT("Deck");
-		case EDealingLocations::Deal: return TEXT("Deal");
-		case EDealingLocations::Hand: return TEXT("Hand");
+		case EDealingLocations::DealFrom: return TEXT("Deal");
+		case EDealingLocations::DealTo: return TEXT("Hand");
 		case EDealingLocations::All: return TEXT("All");
 		}
 
@@ -43,7 +98,10 @@ USTRUCT() struct FDealLocationVectors
 
 	FDealLocationVectors()
 	{
-		for (FVector V : Locations)
+		DeckLocation = FVector::Zero();
+		DealFromLocation = FVector::Zero();
+
+		for (FVector V : DealToHandLocations)
 		{
 			V = FVector::Zero();
 		}

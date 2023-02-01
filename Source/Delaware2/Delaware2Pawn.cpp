@@ -2,6 +2,8 @@
 
 
 #include "Delaware2Pawn.h"
+#include "Delaware2PlayerState.h"
+#include "Delaware2GameState.h"
 
 // Sets default values
 ADelaware2Pawn::ADelaware2Pawn()
@@ -16,8 +18,33 @@ void ADelaware2Pawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Reset();
+
+	//Reset();
+	ADelaware2GameState* GameState = StaticCast<ADelaware2GameState*>(GetWorld()->GetGameState());
+	FString PawnName = GetActorNameOrLabel();
 	
+	if (PawnName[0] == 'N')
+	{
+		PlayerSide = EPlayers::North;
+	}
+	else if (PawnName[0] == 'E')
+	{
+		PlayerSide = EPlayers::East;
+	}
+	else if (PawnName[0] == 'S')
+	{
+		PlayerSide = EPlayers::South;
+	}
+	else if (PawnName[0] == 'W')
+	{
+		PlayerSide = EPlayers::West;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Playerside found in D2Pawn BeginPlay, Pawn Name is %s"), *PawnName);
+	}
+
+	GameState->InitPlayer(PlayerSide, this);
 }
 
 // Called every frame
@@ -25,6 +52,17 @@ void ADelaware2Pawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	/*
+	ADelaware2GameState* GameState = static_cast<ADelaware2GameState*>(GetWorld()->GetGameState());
+
+	if (GameState->GetCurrentState() == EGameStates::Sorting)
+	{
+		if (!PlayerHand->IsSorted())
+		{
+			PlayerHand->Sort();
+		}
+
+	}*/
 }
 
 // Called to bind functionality to input
@@ -37,7 +75,7 @@ void ADelaware2Pawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+/*
 void ADelaware2Pawn::Reset()
 {
 	LastBid = 0;
@@ -91,5 +129,5 @@ uint8 ADelaware2Pawn::GetMeldBid()
 }
 
 
-
+*/
 

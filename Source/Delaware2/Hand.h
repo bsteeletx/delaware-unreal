@@ -79,19 +79,18 @@ class DELAWARE2_API Hand
 {
 public:
 	Hand();
-	~Hand();
-
 
 	void AddCard(class ACard* toAdd);
+	void CalculateMeld();
 	uint8 GetNumberOfCardsOfType(ERank rank, ESuit suit);
 	uint8 GetSize();
-	bool HasMarriageIn(ESuit suit);
-	void CalculateMeld();
 	int HasCard(ACard* cardToFind);
+	bool HasMarriageIn(ESuit suit);
+	bool IsSorted();
 	ACard* RemoveCard(ACard* toRemove);
 	void Reset();
 	void Sort();
-	
+
 	bool HasRoundRobin;
 	bool HasDoubleRun;
 
@@ -109,17 +108,20 @@ private:
 	TArray<class ACard*> GetAllCardsOfSuit(ESuit suit);
 	uint8 GetNumberOfAces();
 
-	TArray<class ACard*> Cards;
-	TMap<EMeldType, uint8> MeldValues;
-	uint8 RunsInSuits;
-	ESuitMeld DoubleRunInSuit;
-	ESuitMeld StrongestSuitWithRun;
-	ESuitMeld StrongestSuit;
-	uint8 HasMarriageInSuit;
-	uint8 MeldTotal;
-	uint8 Pinochles;
-	uint8 RankAround;
-	uint8 NumberOfMarriagesForEachSuit[4];
-	uint8 SuitValue;
-	int MeldType;
+	UPROPERTY(VisibleAnywhere)
+		TArray<ACard*> Cards;
+
+	static TMap<EMeldType, uint8> MeldValues;
+	uint8 RunsInSuits = 0;
+	ESuitMeld DoubleRunInSuit = ESuitMeld::None;
+	ESuitMeld StrongestSuitWithRun = ESuitMeld::None;
+	ESuitMeld StrongestSuit = ESuitMeld::None;
+	uint8 HasMarriageInSuit = 0;
+	uint8 MeldTotal = 0;
+	uint8 Pinochles = 0;
+	uint8 RankAround = 0;
+	uint8 NumberOfMarriagesForEachSuit[4] = { 0, 0, 0, 0 };
+	uint8 SuitValue = 0;
+	int MeldType = 0;
+	bool HandIsSorted = false;
 };

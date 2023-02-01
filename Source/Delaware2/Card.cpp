@@ -53,26 +53,27 @@ void ACard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetActorLocation().Z < 0)
+	if (GetActorLocation().Z < 0 && OwnedBy == EPlayers::West)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Card %d is off the table!!!"), GetCardID());
+		UE_LOG(LogTemp, Warning, TEXT("Card %s, owned by %s, is off the table!!!"), *GetFullCardName(), *EPlayerAsString[(int)OwnedBy - 1]);
 	}
 	
 	FRotator CurrentRotation = GetActorRotation();
-	if (!IsFaceUp)
-	{
-		CurrentRotation.ClampAxis(33.0);
-	}
+	//if (!IsFaceUp)
+	//{
+	//	CurrentRotation.ClampAxis(33.0);
+	//}
 
 	ADelaware2GameState* GameState = static_cast<ADelaware2GameState*>(GetWorld()->GetGameState());
 
 	if (GameState != nullptr)
 	{
-		if (GameState->GetCurrentState() == EGameStates::Dealing)
+		if (GameState->GetCurrentState() == EGameStates::Dealing) //need to take this out, I think--make sure it's mentioned somewhere else (
 		{
-			if (GetVelocity().IsNearlyZero() && HasHitPlayingArea && !HasBeenPlacedInPlayingArea)
+			if (GetVelocity().IsNearlyZero(1) && GetPlayerOwner() != EPlayers::None && HitPlayArea && !HasFiredSort)
 			{
-				SetToFinalDestination();
+				GameState->CardReadyToSort(GetPlayerOwner());
+				HasFiredSort = true;
 			}
 		}
 	}
@@ -208,21 +209,26 @@ void ACard::ResetHeight()
 
 void ACard::Flip()
 {
-	/*if (IsFaceUp)
+	FRotator Rotation = GetActorRotation();
+	Rotation.Pitch = 180.f;
+	if (GetPlayerOwner() == EPlayers::West)
 	{
-		GetStaticMeshComponent()->SetMaterial(0, Back);
+		UE_LOG(LogTemp, Warning, TEXT("Flipping %s"), *GetFullCardName())
 	}
-	else
+	SetActorRotation(Rotation);
+	IsFaceUp = !IsFaceUp;
+}
+
+void ACard::Rotate90()
+{
+	FRotator Rotation(FRotator::ZeroRotator);
+	Rotation.Yaw = 90.f;
+	
+	if (GetPlayerOwner() == EPlayers::West)
 	{
-		if (IsTrumpSuit)
-		{
-			GetStaticMeshComponent()->SetMaterial(0, TrumpFront);
-		}
-		else
-		{
-			GetStaticMeshComponent()->SetMaterial(0, Front);
-		}
-	}*/
+		UE_LOG(LogTemp, Warning, TEXT("Rotating %s's %s 90 degrees, new rotation is: %s"), *EPlayerAsString[(int)GetPlayerOwner() - 1], *GetFullCardName(), *Rotation.ToCompactString());
+	}
+	SetActorRotation(Rotation);
 }
 
 void ACard::ToggleTrump()
@@ -261,7 +267,26 @@ uint8 ACard::GetCardID() const
 	return CardID;
 }
 
-void ACard::SetToLocation(FVector* location, bool useRotation, FRotator rotation)
+void ACard::SetCollision(bool enableCollision)
+{
+	SetPhysics(enableCollision);
+
+	if (enableCollision)
+	{
+		CardMesh->SetCollisionProfileName(FName("PhysicsActor"));
+	}
+	else
+	{
+		CardMesh->SetCollisionProfileName(FName("NoCollision"));
+	}
+}
+
+void ACard::SetPhysics(bool enablePhysics)
+{
+	CardMesh->SetSimulatePhysics(enablePhysics);
+}
+
+void ACard::SetToLocation(FVector* location, bool useCurrentRotation, FRotator rotation)
 {
 	if (location == nullptr)
 	{
@@ -270,7 +295,7 @@ void ACard::SetToLocation(FVector* location, bool useRotation, FRotator rotation
 	}
 	
 	FRotator CurrentRotation = FRotator(0, 0, 0);
-	if (!useRotation)
+	if (!useCurrentRotation)
 	{
 		ADelaware2GameState* GameState = static_cast<ADelaware2GameState*>(GetWorld()->GetGameState());
 		if (GameState->GetDealer() == EPlayers::East || GameState->GetDealer() == EPlayers::West)
@@ -286,7 +311,7 @@ void ACard::SetToLocation(FVector* location, bool useRotation, FRotator rotation
 	const FVector NewLocation = *location;
 	if (!SetActorLocation(NewLocation))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s was unable to be placed at %s! Placing at %s instead"), *GetFullCardName(), *NewLocation.ToCompactString(), *GetActorLocation().ToCompactString());
+		//UE_LOG(LogTemp, Warning, TEXT("%s was unable to be placed at %s! Placing at %s instead"), *GetFullCardName(), *NewLocation.ToCompactString(), *GetActorLocation().ToCompactString());
 	}
 
 	//SetActorEnableCollision(true);
@@ -294,46 +319,11 @@ void ACard::SetToLocation(FVector* location, bool useRotation, FRotator rotation
 
 void ACard::SlowImpulse()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Card Class Stopping Impulse..."));
-	CardMesh->AddImpulse(-GetVelocity() / InverseForceMultiplier / 2);
-		
-	HasHitPlayingArea = true;
-}
-
-void ACard::SetToFinalDestination()
-{
-	if (FinalDestination == FVector::Zero())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Final Destination is 0!"));
-		return;
+	if (!HitPlayArea)
+	{ 	//UE_LOG(LogTemp, Warning, TEXT("Card Class Stopping Impulse..."));
+		CardMesh->AddImpulse(-GetVelocity() / InverseForceMultiplier / 2);
+		HitPlayArea = true;
 	}
-
-	if (GetVelocity().Equals(FVector::ZeroVector), 1.0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Placing %s of %s at Final Destination, %s"), *RanksAsStrings[(int)Rank-1], *SuitsAsStrings[(int)Suit-1], *FinalDestination.ToCompactString());
-		FRotator Rotation;
-		if (GetPlayerOwner() == EPlayers::North || GetPlayerOwner() == EPlayers::South)
-		{
-			Rotation = FRotator::ZeroRotator;
-		}
-		else
-		{
-			Rotation = FRotator(0, 90, 0);
-		}
-		//UE_LOG(LogTemp, Warning, TEXT("Rotation is set to %s"), *Rotation.ToCompactString());
-		SetActorRotation(Rotation);
-		SetToLocation(&FinalDestination); 
-		//SetActorEnableCollision(false);
-		SetActorTickEnabled(false);
-		HasHitPlayingArea = false;
-		HasBeenPlacedInPlayingArea = true;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Velocity is NOT zero!"));
-	}
-
-	//TODO: Add setting Rotation too
 }
 
 void ACard::DealToLocation(FVector* destination)
@@ -345,9 +335,9 @@ void ACard::DealToLocation(FVector* destination)
 	FVector ImpulseVector = (*destination - CardLocation)/InverseForceMultiplier; 
 
 	FinalDestination = *destination;
-
+	
 	//UE_LOG(LogTemp, Warning, TEXT("Adding Impulse to %s of %s"), *GetFullCardName(), *ImpulseVector.ToString());
-	CardMesh->AddImpulse(ImpulseVector);
+	CardMesh->AddImpulse(ImpulseVector); //-1575 + 185
 	//GetStaticMeshComponent()->AddImpulse(ImpulseVector);
 }
 
@@ -359,4 +349,9 @@ void ACard::SetPlayerOwner(EPlayers owner)
 EPlayers ACard::GetPlayerOwner()
 {
 	return OwnedBy;
+}
+
+FVector* ACard::GetFinalDestination()
+{
+	return &FinalDestination;
 }

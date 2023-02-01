@@ -28,29 +28,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	class Hand* ThisHand;
-	uint8 GetKnownOfSuit(ESuit suit);
-	uint8 GetID();
-	uint8 GetMeldBid();
-	uint8 GetNumOfBids();
-	bool GetSaveBid();
-	bool IsTrumpingThisSuit(ESuit suit);
-	void IncrementNumOfBids();
-	void Reset();
-	void ResetKnown();
-	void SetMeldBid(uint8 value);
-	void SetPlayerID(uint8 newID);
-	void ToggleSaveBid();
-
-
-	bool IsTrumpingSuit[4];
-	void SetLastBid(uint8 bidAmount);
-	uint8 GetLastBid();
-	uint8 MeldBid;
-	uint8 NumberOfBids;
-	uint8 PlayerID;
-	bool SaveBid;
-	uint8 LastBid;
+	
 	bool IsAIControlled;
 
+private:
+
+	EPlayers PlayerSide;
 };

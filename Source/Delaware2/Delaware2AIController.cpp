@@ -3,11 +3,13 @@
 
 #include "Delaware2AIController.h"
 #include "Card.h"
-#include "Hand.h"
+
 
 ADelaware2AIController::ADelaware2AIController()
 {
 	Reset();
+
+	bWantsPlayerState = true;
 }
 
 void ADelaware2AIController::Reset()

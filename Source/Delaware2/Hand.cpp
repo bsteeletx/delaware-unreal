@@ -3,30 +3,36 @@
 
 #include "Hand.h"
 #include "Card.h"
+#include "Delaware2GameState.h"
+
+TMap<EMeldType, uint8> Hand::MeldValues;
 
 Hand::Hand()
 {
-	MeldValues.Add(EMeldType::Marriage, 2);
-	MeldValues.Add(EMeldType::MarriageInTrump, 4);
-	MeldValues.Add(EMeldType::Pinochle, 4);
-	MeldValues.Add(EMeldType::JacksAround, 4);
-	MeldValues.Add(EMeldType::QueensAround, 6);
-	MeldValues.Add(EMeldType::KingsAround, 8);
-	MeldValues.Add(EMeldType::AcesAround, 10);
-	MeldValues.Add(EMeldType::Run, 15);
-	MeldValues.Add(EMeldType::RoundRobin, 24);
-	MeldValues.Add(EMeldType::DoublePinochle, 30);
-	MeldValues.Add(EMeldType::DoubleJacksAround, 40);
-	MeldValues.Add(EMeldType::DoubleQueensAround, 60);
-	MeldValues.Add(EMeldType::DoubleKingsAround, 80);
-	MeldValues.Add(EMeldType::TriplePinochle, 90);
-	MeldValues.Add(EMeldType::DoubleAcesAround, 100);
-	MeldValues.Add(EMeldType::QuadPinochle, 120);
-	MeldValues.Add(EMeldType::DoubleRun, 150);
-}
+	UE_LOG(LogTemp, Warning, TEXT("Creating Empty Hand"));
 
-Hand::~Hand()
-{
+	Cards.SetNum(0);
+
+	if (MeldValues.Num() == 0)
+	{
+		MeldValues.Emplace(EMeldType::Marriage, 2);
+		MeldValues.Emplace(EMeldType::MarriageInTrump, 4);
+		MeldValues.Emplace(EMeldType::Pinochle, 4);
+		MeldValues.Emplace(EMeldType::JacksAround, 4);
+		MeldValues.Emplace(EMeldType::QueensAround, 6);
+		MeldValues.Emplace(EMeldType::KingsAround, 8);
+		MeldValues.Emplace(EMeldType::AcesAround, 10);
+		MeldValues.Emplace(EMeldType::Run, 15);
+		MeldValues.Emplace(EMeldType::RoundRobin, 24);
+		MeldValues.Emplace(EMeldType::DoublePinochle, 30);
+		MeldValues.Emplace(EMeldType::DoubleJacksAround, 40);
+		MeldValues.Emplace(EMeldType::DoubleQueensAround, 60);
+		MeldValues.Emplace(EMeldType::DoubleKingsAround, 80);
+		MeldValues.Emplace(EMeldType::TriplePinochle, 90);
+		MeldValues.Emplace(EMeldType::DoubleAcesAround, 100);
+		MeldValues.Emplace(EMeldType::QuadPinochle, 120);
+		MeldValues.Emplace(EMeldType::DoubleRun, 150);
+	}
 }
 
 void Hand::Reset()
@@ -43,9 +49,13 @@ void Hand::Reset()
 	HasMarriageInSuit = (int)ESuitMeld::None;
 	HasRoundRobin = false;
 	HasDoubleRun = false;
+	HandIsSorted = false;
 
 	MeldTotal = 0;
 	MeldType = 0;
+
+	UE_LOG(LogTemp, Warning, TEXT("Emptying Hand"));
+	Cards.Empty(40);
 }
 
 uint8 Hand::GetNumberOfCardsOfType(ERank rank, ESuit suit)
@@ -85,22 +95,42 @@ ACard* Hand::RemoveCard(ACard* toRemove)
 
 int Hand::HasCard(ACard* toFind)
 {
-	if (Cards.Find(toFind) != INDEX_NONE)
-	{
-		return Cards.Find(toFind);
-	}
-	
-	return INDEX_NONE;
+	return Cards.Find(toFind);
 }
 
 void Hand::AddCard(ACard* toAdd)
 {
 	Cards.Add(toAdd);
+	HandIsSorted = false;
 }
 
 void Hand::Sort()
 {
+	if (HandIsSorted)
+	{
+		return;
+	}
+
 	bool Done = false;
+
+	UE_LOG(LogTemp, Warning, TEXT("Hand-Sort: Attempting To Sort..."));
+
+	ADelaware2GameState* GameState = static_cast<ADelaware2GameState*>(Cards[0]->GetWorld()->GetGameState());
+	EPlayers Owner = Cards[0]->GetPlayerOwner();
+	//FVector InitialLocation = GameState->GetDealLocation(Owner);
+	bool Sideways = (Owner == EPlayers::East || Owner == EPlayers::West);
+
+	for (ACard* Card : Cards)
+	{
+		if (Sideways)
+		{
+			Card->Rotate90();
+		}
+		if (Card->GetPlayerOwner() == EPlayers::South || Card->GetPlayerOwner() == EPlayers::West)
+		{
+			Card->Flip();
+		}
+	}
 
 	while (!Done)
 	{
@@ -108,14 +138,50 @@ void Hand::Sort()
 
 		for (int i = 0; i < Cards.Num() - 1; i++)
 		{
-			if (Cards[i]->GetCardID() > Cards[i + 1]->GetCardID())
+			Cards[i]->SetCollision(false);
+
+			//Placing in Proper Playing Area
+			if (Cards[i]->GetActorLocation() != *Cards[i]->GetFinalDestination())
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Sending %s to Final Destination %s\nSending %s to Final Destination %s"), *Cards[i]->GetFullCardName(),
+					*Cards[i]->GetFinalDestination()->ToCompactString(), *Cards[i + 1]->GetFullCardName(), *Cards[i + 1]->GetFinalDestination()->ToCompactString());
+				Cards[i]->SetToLocation(Cards[i]->GetFinalDestination(), true);
+				Cards[i + 1]->SetToLocation(Cards[i + 1]->GetFinalDestination(), true);
+			}
+
+			//Actual sorting
+			if (Cards[i]->GetCardID() > Cards[i + 1]->GetCardID()) //TODO: Why are cards getting placed below screen??
+			{
+				if (Cards[i]->GetPlayerOwner() == EPlayers::West)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Swapping Slot %d\tCard %s\tat %s\t and \tSlot %d\tCard %s\tat %s..."), 
+						i, *Cards[i]->GetFullCardName(), *Cards[i]->GetActorLocation().ToCompactString(), i + 1, *Cards[i + 1]->GetFullCardName(), 
+						*Cards[i + 1]->GetActorLocation().ToCompactString());
+				}
+				
 				Cards.Swap(i, i + 1);
+
+				if (Cards[i]->GetPlayerOwner() == EPlayers::West)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("After Swap: Slot %d\tCard %s\tat %s\t and \tSlot %d\tCard %s\tat %s..."),
+						i, *Cards[i]->GetFullCardName(), *Cards[i]->GetActorLocation().ToCompactString(), i + 1, *Cards[i + 1]->GetFullCardName(),
+						*Cards[i + 1]->GetActorLocation().ToCompactString());
+					//UE_LOG(LogTemp, Warning, TEXT("Swapping the location 1 (%s) with location 2 (%s)"), *Cards[i]->GetFinalDestination()->ToCompactString(), *Cards[i + 1]->GetFinalDestination()->ToCompactString());
+				}
 
 				Done = false;
 			}
 		}
 	}
+
+	HandIsSorted = true;
+}
+
+
+
+bool Hand::IsSorted()
+{
+	return HandIsSorted;
 }
 
 uint8 Hand::GetSize()
@@ -417,7 +483,7 @@ TArray<ACard*> Hand::GetAllCardsOfSuit(ESuit suit)
 	{
 		if (Card->GetSuit() == suit)
 		{
-			AllCardsInSuit.Add(Card);
+			AllCardsInSuit.Emplace(Card);
 		}
 	}
 

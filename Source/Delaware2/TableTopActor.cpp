@@ -17,7 +17,7 @@ ATableTopActor::ATableTopActor()
 	RootComponent = BoxComponent;
 
 	TableTopMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Table Top Mesh"));
-	TableTopMesh->SetupAttachment(TableTopMesh);
+	TableTopMesh->SetupAttachment(RootComponent);
 
 	TrumpSelectionSymbol = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("Trump Symbol-All"));
 	TrumpSelectionSymbol->SetupAttachment(TableTopMesh);
