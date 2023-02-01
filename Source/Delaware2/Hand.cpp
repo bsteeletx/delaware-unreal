@@ -143,14 +143,14 @@ void Hand::Sort()
 			//Placing in Proper Playing Area
 			if (Cards[i]->GetActorLocation() != *Cards[i]->GetFinalDestination())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Sending %s to Final Destination %s\nSending %s to Final Destination %s"), *Cards[i]->GetFullCardName(),
-					*Cards[i]->GetFinalDestination()->ToCompactString(), *Cards[i + 1]->GetFullCardName(), *Cards[i + 1]->GetFinalDestination()->ToCompactString());
+				//UE_LOG(LogTemp, Warning, TEXT("Sending %s to Final Destination %s\nSending %s to Final Destination %s"), *Cards[i]->GetFullCardName(),
+				//	*Cards[i]->GetFinalDestination()->ToCompactString(), *Cards[i + 1]->GetFullCardName(), *Cards[i + 1]->GetFinalDestination()->ToCompactString());
 				Cards[i]->SetToLocation(Cards[i]->GetFinalDestination(), true);
 				Cards[i + 1]->SetToLocation(Cards[i + 1]->GetFinalDestination(), true);
 			}
 
 			//Actual sorting
-			if (Cards[i]->GetCardID() > Cards[i + 1]->GetCardID()) //TODO: Why are cards getting placed below screen??
+			if (Cards[i]->GetCardID() > Cards[i + 1]->GetCardID()) //TODO: Why are cards getting impulsed below the playing area?
 			{
 				if (Cards[i]->GetPlayerOwner() == EPlayers::West)
 				{

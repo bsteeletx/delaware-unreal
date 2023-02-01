@@ -53,7 +53,7 @@ void ACard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetActorLocation().Z < 0 && OwnedBy == EPlayers::West)
+	if (GetActorLocation().Z < -100 && OwnedBy == EPlayers::West)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Card %s, owned by %s, is off the table!!!"), *GetFullCardName(), *EPlayerAsString[(int)OwnedBy - 1]);
 	}
