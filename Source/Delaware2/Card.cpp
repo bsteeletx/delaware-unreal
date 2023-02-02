@@ -95,6 +95,13 @@ FString ACard::GetFullCardName() const
 	return Name;
 }
 
+void ACard::SetFinalDestination(FVector* newDestination)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Final Destination WAS %s"), *FinalDestination.ToCompactString());
+	FinalDestination = *newDestination;
+	UE_LOG(LogTemp, Warning, TEXT("Final Destination is NOW %s"), *FinalDestination.ToCompactString());
+}
+
 uint8 ACard::CreateCardID()
 {
 	int SuitAsInt = (int)Suit;
@@ -312,6 +319,10 @@ void ACard::SetToLocation(FVector* location, bool useCurrentRotation, FRotator r
 	if (!SetActorLocation(NewLocation))
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("%s was unable to be placed at %s! Placing at %s instead"), *GetFullCardName(), *NewLocation.ToCompactString(), *GetActorLocation().ToCompactString());
+	}
+	else
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("%s was placed at %s"), *GetFullCardName(), *NewLocation.ToCompactString());
 	}
 
 	//SetActorEnableCollision(true);

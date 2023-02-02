@@ -21,7 +21,6 @@ const static ESuit AllSuits[] = { ESuit::Diamonds, ESuit::Clubs,  ESuit::Hearts,
 
 const static FString SuitsAsStrings[] = { "Diamonds", "Clubs", "Hearts", "Spades" };
 
-
 UCLASS()
 class DELAWARE2_API ACard : public AActor
 {
@@ -40,7 +39,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-
+	
 	void DealToLocation(FVector* destination);
 	
 	void Flip();
@@ -59,12 +58,14 @@ public:
 	void Rotate90();
 
 	void SetCollision(bool enableCollision);
+	void SetFinalDestination(FVector* newDestination);
 	void SetPhysics(bool enablePhysics);
 	void SetPlayerOwner(EPlayers player);
 	void SetRank(ERank rank);
 	void SetSuit(ESuit suit);
 	void SetToLocation(FVector* location, bool useCurrentRotation = false, FRotator rotation = FRotator::ZeroRotator);
 	void SlowImpulse();
+	
 
 	void ToggleTrump();
 

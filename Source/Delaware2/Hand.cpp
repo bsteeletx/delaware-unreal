@@ -132,46 +132,64 @@ void Hand::Sort()
 		}
 	}
 
+	for (ACard* Card : Cards)
+	{
+		Card->SetCollision(false);
+
+		//Placing in Proper Playing Area
+		if (Card->GetActorLocation() != *Card->GetFinalDestination())
+		{
+			Card->SetToLocation(Card->GetFinalDestination(), true);
+		}
+	}
+
 	while (!Done)
 	{
 		Done = true;
 
 		for (int i = 0; i < Cards.Num() - 1; i++)
 		{
-			Cards[i]->SetCollision(false);
-
-			//Placing in Proper Playing Area
-			if (Cards[i]->GetActorLocation() != *Cards[i]->GetFinalDestination())
+			if (Cards[i]->GetCardID() < Cards[i + 1]->GetCardID())
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("Sending %s to Final Destination %s\nSending %s to Final Destination %s"), *Cards[i]->GetFullCardName(),
-				//	*Cards[i]->GetFinalDestination()->ToCompactString(), *Cards[i + 1]->GetFullCardName(), *Cards[i + 1]->GetFinalDestination()->ToCompactString());
-				Cards[i]->SetToLocation(Cards[i]->GetFinalDestination(), true);
-				Cards[i + 1]->SetToLocation(Cards[i + 1]->GetFinalDestination(), true);
-			}
+				//if (Cards[i]->GetPlayerOwner() == EPlayers::West)
+				//{
+					//UE_LOG(LogTemp, Warning, TEXT("Swapping Slot %d\nCard %s\tID %d\tand \tSlot %d\nCard %s\tID %d..."), 
+					//	i, *Cards[i]->GetFullCardName(), Cards[i]->GetCardID(), i + 1, *Cards[i + 1]->GetFullCardName(), Cards[i+1]->GetCardID());
+				//}
 
-			//Actual sorting
-			if (Cards[i]->GetCardID() > Cards[i + 1]->GetCardID()) //TODO: Why are cards getting impulsed below the playing area?
-			{
-				if (Cards[i]->GetPlayerOwner() == EPlayers::West)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Swapping Slot %d\tCard %s\tat %s\t and \tSlot %d\tCard %s\tat %s..."), 
-						i, *Cards[i]->GetFullCardName(), *Cards[i]->GetActorLocation().ToCompactString(), i + 1, *Cards[i + 1]->GetFullCardName(), 
-						*Cards[i + 1]->GetActorLocation().ToCompactString());
-				}
+				FVector Temp = *Cards[i]->GetFinalDestination();
+				UE_LOG(LogTemp, Warning, TEXT("Temp FVector: %s"), *Temp.ToCompactString());
 				
+				Cards[i]->SetFinalDestination(Cards[i + 1]->GetFinalDestination()); //for some reason, they are all getting assigned the same FVectors
+				Cards[i + 1]->SetFinalDestination(&Temp);
 				Cards.Swap(i, i + 1);
+				Cards[i]->SetToLocation(Cards[i]->GetFinalDestination(), true);
+				Cards[i+1]->SetToLocation(Cards[i+1]->GetFinalDestination(), true);
 
 				if (Cards[i]->GetPlayerOwner() == EPlayers::West)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("After Swap: Slot %d\tCard %s\tat %s\t and \tSlot %d\tCard %s\tat %s..."),
+					UE_LOG(LogTemp, Warning, TEXT("After Swap: Slot %d\tCard %s\tat %s\t and \n\tSlot %d\tCard %s\tat %s..."),
 						i, *Cards[i]->GetFullCardName(), *Cards[i]->GetActorLocation().ToCompactString(), i + 1, *Cards[i + 1]->GetFullCardName(),
 						*Cards[i + 1]->GetActorLocation().ToCompactString());
 					//UE_LOG(LogTemp, Warning, TEXT("Swapping the location 1 (%s) with location 2 (%s)"), *Cards[i]->GetFinalDestination()->ToCompactString(), *Cards[i + 1]->GetFinalDestination()->ToCompactString());
 				}
 
+				DumpToLog();
+
 				Done = false;
 			}
 		}
+	}
+}
+
+void Hand::DumpToLog()
+{
+
+	UE_LOG(LogTemp, Warning, TEXT("Hand Dump..."));
+
+	for (ACard* Card : Cards)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s\t%s"), *Card->GetFullCardName(), *Card->GetActorLocation().ToCompactString());
 	}
 
 	HandIsSorted = true;

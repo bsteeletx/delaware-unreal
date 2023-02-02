@@ -96,17 +96,21 @@ public:
 
 private:
 
-	uint8 GetMeldFromPinochles();
-	uint8 GetMeldFromMarriages();
-	void UpdateRanksAround();
-	EAroundAmount GetNumberOfAround(ERank rank);
+	void DumpToLog();
+
+	TArray<class ACard*> GetAllCardsOfSuit(ESuit suit);
 	uint8 GetMeldFromAround();
-	void SetRoundRobinFlag();
-	void SetRunsInHand();
+	uint8 GetMeldFromMarriages();
+	uint8 GetMeldFromPinochles();
+	uint8 GetNumberOfAces();
+	EAroundAmount GetNumberOfAround(ERank rank);
 	uint8 GetRunSize(ESuit suit);
 	uint8 GetSuitValue(ESuit suit);
-	TArray<class ACard*> GetAllCardsOfSuit(ESuit suit);
-	uint8 GetNumberOfAces();
+
+	void SetRoundRobinFlag();
+	void SetRunsInHand();
+
+	void UpdateRanksAround();
 
 	UPROPERTY(VisibleAnywhere)
 		TArray<ACard*> Cards;
