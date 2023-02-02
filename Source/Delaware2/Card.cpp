@@ -53,7 +53,7 @@ void ACard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetActorLocation().Z < -100 && OwnedBy == EPlayers::West)
+	if (GetActorLocation().Z < -100 && OwnedBy == EPlayers::North)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Card %s, owned by %s, is off the table!!!"), *GetFullCardName(), *EPlayerAsString[(int)OwnedBy - 1]);
 	}
@@ -218,7 +218,7 @@ void ACard::Flip()
 {
 	FRotator Rotation = GetActorRotation();
 	Rotation.Pitch = 180.f;
-	if (GetPlayerOwner() == EPlayers::West)
+	if (GetPlayerOwner() == EPlayers::North)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Flipping %s"), *GetFullCardName())
 	}
@@ -226,14 +226,14 @@ void ACard::Flip()
 	IsFaceUp = !IsFaceUp;
 }
 
-void ACard::Rotate90()
+void ACard::Rotate(float zValue)
 {
 	FRotator Rotation(FRotator::ZeroRotator);
-	Rotation.Yaw = 90.f;
+	Rotation.Yaw = zValue;
 	
-	if (GetPlayerOwner() == EPlayers::West)
+	if (GetPlayerOwner() == EPlayers::North)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Rotating %s's %s 90 degrees, new rotation is: %s"), *EPlayerAsString[(int)GetPlayerOwner() - 1], *GetFullCardName(), *Rotation.ToCompactString());
+		UE_LOG(LogTemp, Warning, TEXT("Rotating %s's %s %f degrees, new rotation is: %s"), *EPlayerAsString[(int)GetPlayerOwner() - 1], *GetFullCardName(), Rotation.Yaw, *Rotation.ToCompactString());
 	}
 	SetActorRotation(Rotation);
 }

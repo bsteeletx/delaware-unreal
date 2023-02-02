@@ -55,7 +55,7 @@ public:
 
 	void RaiseHeight();
 	void ResetHeight();
-	void Rotate90();
+	void Rotate(float zValue);
 
 	void SetCollision(bool enableCollision);
 	void SetFinalDestination(FVector* newDestination);

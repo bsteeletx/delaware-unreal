@@ -124,9 +124,13 @@ void Hand::Sort()
 	{
 		if (Sideways)
 		{
-			Card->Rotate90();
+			Card->Rotate(90.f);
 		}
-		if (Card->GetPlayerOwner() == EPlayers::South || Card->GetPlayerOwner() == EPlayers::West)
+		else
+		{
+			Card->Rotate(0.f);
+		}
+		if (Card->GetPlayerOwner() == EPlayers::South || Card->GetPlayerOwner() == EPlayers::North)
 		{
 			Card->Flip();
 		}
@@ -151,12 +155,6 @@ void Hand::Sort()
 		{
 			if (Cards[i]->GetCardID() < Cards[i + 1]->GetCardID())
 			{
-				//if (Cards[i]->GetPlayerOwner() == EPlayers::West)
-				//{
-					//UE_LOG(LogTemp, Warning, TEXT("Swapping Slot %d\nCard %s\tID %d\tand \tSlot %d\nCard %s\tID %d..."), 
-					//	i, *Cards[i]->GetFullCardName(), Cards[i]->GetCardID(), i + 1, *Cards[i + 1]->GetFullCardName(), Cards[i+1]->GetCardID());
-				//}
-
 				FVector Temp = *Cards[i]->GetFinalDestination();
 				UE_LOG(LogTemp, Warning, TEXT("Temp FVector: %s"), *Temp.ToCompactString());
 				
@@ -166,7 +164,7 @@ void Hand::Sort()
 				Cards[i]->SetToLocation(Cards[i]->GetFinalDestination(), true);
 				Cards[i+1]->SetToLocation(Cards[i+1]->GetFinalDestination(), true);
 
-				if (Cards[i]->GetPlayerOwner() == EPlayers::West)
+				if (Cards[i]->GetPlayerOwner() == EPlayers::North)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("After Swap: Slot %d\tCard %s\tat %s\t and \n\tSlot %d\tCard %s\tat %s..."),
 						i, *Cards[i]->GetFullCardName(), *Cards[i]->GetActorLocation().ToCompactString(), i + 1, *Cards[i + 1]->GetFullCardName(),

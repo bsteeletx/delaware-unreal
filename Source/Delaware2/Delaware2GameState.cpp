@@ -294,15 +294,6 @@ FVector ADelaware2GameState::GetDealLocation(EPlayers playerToDealTo)
 
 	Index = RoundTurn * 4 + CardTurn; 
 
-	if (playerToDealTo == EPlayers::West && Index == 0)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("DeckCounter = %d\tRoundTurn = %d\tCardTurn = %d\tIndex = %d"), DeckCounter - 1, RoundTurn, CardTurn, Index);
-		//UE_LOG(LogTemp, Warning, TEXT("Dealing to slot %d,\twhich represents location %s"), Index, *DealLocations[PlayerToDealTo].GetALocation(EDealingLocations::DealTo, Index).ToCompactString());
-		//for (int i = 0; i < 20; i++)
-		//{
-			//UE_LOG(LogTemp, Warning, TEXT("Weston Deal Locations: %d|%s"), i, *DealLocations[PlayerToDealTo].GetALocation(EDealingLocations::DealTo, i).ToCompactString());
-		//}
-	}
 	return DealLocations[PlayerToDealTo].GetALocation(EDealingLocations::DealTo, Index);
 }
 
