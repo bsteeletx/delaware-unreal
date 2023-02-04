@@ -57,8 +57,25 @@ void ACard::Tick(float DeltaTime)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Card %s, owned by %s, is off the table!!!"), *GetFullCardName(), *EPlayerAsString[(int)OwnedBy - 1]);
 	}
-	
+
 	FRotator CurrentRotation = GetActorRotation();
+
+	if (CurrentRotation.Pitch > 7.5f)
+	{
+		CurrentRotation.Pitch = 7.5f;
+	}
+	else if (CurrentRotation.Pitch < -7.5f)
+	{
+		CurrentRotation.Pitch = -7.5f;
+	}
+	if (CurrentRotation.Roll > 7.5f)
+	{
+		CurrentRotation.Roll = 7.5f;
+	}
+	else if (CurrentRotation.Roll < -7.5f)
+	{
+		CurrentRotation.Roll = -7.5f;
+	}
 	//if (!IsFaceUp)
 	//{
 	//	CurrentRotation.ClampAxis(33.0);

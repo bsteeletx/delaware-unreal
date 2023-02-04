@@ -51,6 +51,11 @@ void ADelaware2GameState::Tick(float DeltaTime)
 		if (!WithinDeckCounterRange)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Finished Dealing"));
+			//in case some cards didn't quite make it, do one more sort
+			for (ADelaware2PlayerState* Player : PlayerStates)
+			{
+				Player->SortHand();
+			}
 			++CurrentState;
 		}
 		else if (FirstCard || !NextSetOfFour) //DealFrom at roughly the same time
