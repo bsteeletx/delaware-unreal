@@ -35,6 +35,9 @@ Hand::Hand()
 	}
 }
 
+/// <summary>
+/// Resets hand in between rounds
+/// </summary>
 void Hand::Reset()
 {
 	for (int i = 0; i < 4; i++)
@@ -54,10 +57,15 @@ void Hand::Reset()
 	MeldTotal = 0;
 	MeldType = 0;
 
-	UE_LOG(LogTemp, Warning, TEXT("Emptying Hand"));
 	Cards.Empty(40);
 }
 
+/// <summary>
+/// Returns the number of cards that match rank and suit--not used yet, may need to be changed
+/// </summary>
+/// <param name="rank">ERank of card searching for</param>
+/// <param name="suit">ESuit of card searching for</param>
+/// <returns>number of cards matching query</returns>
 uint8 Hand::GetNumberOfCardsOfType(ERank rank, ESuit suit)
 {
 	if (rank == ERank::Any || suit == ESuit::Any)
@@ -79,6 +87,11 @@ uint8 Hand::GetNumberOfCardsOfType(ERank rank, ESuit suit)
 	return NumberOfCards;
 }
 
+/// <summary>
+/// Removes card from Cards array
+/// </summary>
+/// <param name="toRemove">Card to remove</param>
+/// <returns>pointer to Card</returns>
 ACard* Hand::RemoveCard(ACard* toRemove)
 {
 	ACard* ReturningCard = nullptr;
@@ -93,17 +106,54 @@ ACard* Hand::RemoveCard(ACard* toRemove)
 	return ReturningCard;
 }
 
+/// <summary>
+/// Checks to see if this hand contains the Card queried
+/// </summary>
+/// <param name="toFind">Card to find in hand</param>
+/// <returns>first index of card in hand</returns>
 int Hand::HasCard(ACard* toFind)
 {
 	return Cards.Find(toFind);
 }
 
+/// <summary>
+/// Adds Card to Hand
+/// </summary>
+/// <param name="toAdd">Card to add</param>
 void Hand::AddCard(ACard* toAdd)
 {
 	Cards.Add(toAdd);
 	HandIsSorted = false;
 }
 
+/// <summary>
+/// Takes card and rotates it by which owner controls it
+/// </summary>
+/// <param name="card"></param>
+void RotateCardToProperLocation(ACard* card)
+{
+	ADelaware2GameState* GameState = static_cast<ADelaware2GameState*>(card->GetWorld()->GetGameState());
+	EPlayers Owner = card->GetPlayerOwner();
+	bool Sideways = (Owner == EPlayers::East || Owner == EPlayers::West);
+
+	if (Sideways)
+	{
+		card->Rotate(90.f);
+	}
+	else
+	{
+		card->Rotate(0.f);
+	}
+
+	if (card->GetPlayerOwner() == EPlayers::South)
+	{
+		card->Flip();
+	}
+}
+
+/// <summary>
+/// Sorts Hand
+/// </summary>
 void Hand::Sort()
 {
 	if (HandIsSorted)
@@ -113,31 +163,9 @@ void Hand::Sort()
 
 	bool Done = false;
 
-	UE_LOG(LogTemp, Warning, TEXT("Hand-Sort: Attempting To Sort..."));
-
-	ADelaware2GameState* GameState = static_cast<ADelaware2GameState*>(Cards[0]->GetWorld()->GetGameState());
-	EPlayers Owner = Cards[0]->GetPlayerOwner();
-	//FVector InitialLocation = GameState->GetDealLocation(Owner);
-	bool Sideways = (Owner == EPlayers::East || Owner == EPlayers::West);
-
 	for (ACard* Card : Cards)
 	{
-		if (Sideways)
-		{
-			Card->Rotate(90.f);
-		}
-		else
-		{
-			Card->Rotate(0.f);
-		}
-		if (Card->GetPlayerOwner() == EPlayers::South || Card->GetPlayerOwner() == EPlayers::North)
-		{
-			Card->Flip();
-		}
-	}
-
-	for (ACard* Card : Cards)
-	{
+		RotateCardToProperLocation(Card);
 		Card->SetCollision(false);
 
 		//Placing in Proper Playing Area
@@ -156,23 +184,12 @@ void Hand::Sort()
 			if (Cards[i]->GetCardID() < Cards[i + 1]->GetCardID())
 			{
 				FVector Temp = *Cards[i]->GetFinalDestination();
-				UE_LOG(LogTemp, Warning, TEXT("Temp FVector: %s"), *Temp.ToCompactString());
-				
-				Cards[i]->SetFinalDestination(Cards[i + 1]->GetFinalDestination()); //for some reason, they are all getting assigned the same FVectors
+								
+				Cards[i]->SetFinalDestination(Cards[i + 1]->GetFinalDestination()); 
 				Cards[i + 1]->SetFinalDestination(&Temp);
 				Cards.Swap(i, i + 1);
 				Cards[i]->SetToLocation(Cards[i]->GetFinalDestination(), true);
 				Cards[i+1]->SetToLocation(Cards[i+1]->GetFinalDestination(), true);
-
-				if (Cards[i]->GetPlayerOwner() == EPlayers::North)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("After Swap: Slot %d\tCard %s\tat %s\t and \n\tSlot %d\tCard %s\tat %s..."),
-						i, *Cards[i]->GetFullCardName(), *Cards[i]->GetActorLocation().ToCompactString(), i + 1, *Cards[i + 1]->GetFullCardName(),
-						*Cards[i + 1]->GetActorLocation().ToCompactString());
-					//UE_LOG(LogTemp, Warning, TEXT("Swapping the location 1 (%s) with location 2 (%s)"), *Cards[i]->GetFinalDestination()->ToCompactString(), *Cards[i + 1]->GetFinalDestination()->ToCompactString());
-				}
-
-				DumpToLog();
 
 				Done = false;
 			}
@@ -180,6 +197,9 @@ void Hand::Sort()
 	}
 }
 
+/// <summary>
+/// Debug to dump all cards in hand to log
+/// </summary>
 void Hand::DumpToLog()
 {
 
@@ -193,24 +213,37 @@ void Hand::DumpToLog()
 	HandIsSorted = true;
 }
 
-
-
+/// <summary>
+/// returns true if hand is sorted
+/// </summary>
+/// <returns></returns>
 bool Hand::IsSorted()
 {
 	return HandIsSorted;
 }
 
-uint8 Hand::GetSize()
+/// <summary>
+/// Returns number of cards in hand
+/// </summary>
+/// <returns></returns>
+uint8 Hand::GetNumberOfCards()
 {
 	return Cards.Num();
 }
 
+/// <summary>
+/// Sets if player has a round robin or not
+/// </summary>
 void Hand::SetRoundRobinFlag()
 {
 	if (HasMarriageInSuit == (int)ESuitMeld::All)
 		HasRoundRobin = true;
 }
 
+/// <summary>
+/// Returns total meld from marriages
+/// </summary>
+/// <returns></returns>
 uint8 Hand::GetMeldFromMarriages()
 {
 	uint8 TotalNumberOfMarriages = 0;
@@ -237,6 +270,11 @@ uint8 Hand::GetMeldFromMarriages()
 	return TotalNumberOfMarriages * MeldValues[EMeldType::Marriage];
 }
 
+/// <summary>
+/// Determines if you have something around
+/// </summary>
+/// <param name="rank">rank to check for around</param>
+/// <returns>EArroundAmount referencing how many you have around</returns>
 EAroundAmount Hand::GetNumberOfAround(ERank rank)
 {
 	bool HasAround = true;
@@ -244,13 +282,9 @@ EAroundAmount Hand::GetNumberOfAround(ERank rank)
 
 	for (int j = (int)ESuit::Clubs; j < (int)ESuit::All; j++)
 	{
-		ACard Temp = ACard();
-		Temp.SetRank(rank);
-		Temp.SetSuit((ESuit)j);
-
-		if (HasCard(&Temp))
+		if (HasCard(&ACard(rank, (ESuit)j)))
 		{
-			if (Has2xAround && GetNumberOfCardsOfType(Temp.GetRank(), Temp.GetSuit()) < 2)
+			if (Has2xAround && GetNumberOfCardsOfType(rank, (ESuit)j) < 2)
 				Has2xAround = false;
 		}
 		else
@@ -269,6 +303,9 @@ EAroundAmount Hand::GetNumberOfAround(ERank rank)
 	return EAroundAmount::Single;
 }
 
+/// <summary>
+/// Updates Rank Around property to accurately reflect what the hand has around
+/// </summary>
 void Hand::UpdateRanksAround()
 {
 	for (int i = (int)ERank::Jack; i < (int)ERank::All; i++)
@@ -302,6 +339,10 @@ void Hand::UpdateRanksAround()
 	}
 }
 
+/// <summary>
+/// Takes RankAround property and turns it into meld values, then returns meld based on those values
+/// </summary>
+/// <returns>Meld from ranks around</returns>
 uint8 Hand::GetMeldFromAround()
 {
 	UpdateRanksAround();
@@ -360,15 +401,15 @@ uint8 Hand::GetMeldFromAround()
 	return MeldFromAround;
 }
 
+/// <summary>
+/// Gets Meld from Pinochles
+/// </summary>
+/// <returns></returns>
 uint8 Hand::GetMeldFromPinochles()
 {
-	ACard QueenOfSpades;
-	ACard JackOfDiamonds;
-	QueenOfSpades.SetRank(ERank::Queen);
-	QueenOfSpades.SetSuit(ESuit::Spades);
-	JackOfDiamonds.SetRank(ERank::Jack);
-	JackOfDiamonds.SetSuit(ESuit::Diamonds);
-
+	ACard QueenOfSpades(ERank::Queen, ESuit::Spades);
+	ACard JackOfDiamonds(ERank::Jack, ESuit::Diamonds);
+	
 	uint8 NumberOfPinochles = 0;
 
 	if (HasCard(&QueenOfSpades) && HasCard(&JackOfDiamonds))
@@ -403,6 +444,9 @@ uint8 Hand::GetMeldFromPinochles()
 	return 0;
 }
 
+/// <summary>
+/// Calculates all meld from various meld types, and sums them in to the property, MeldTotal
+/// </summary>
 void Hand::CalculateMeld()
 {
 	MeldTotal += GetMeldFromMarriages();
@@ -410,6 +454,9 @@ void Hand::CalculateMeld()
 	MeldTotal += GetMeldFromPinochles();
 }
 
+/// <summary>
+/// Looks for runs in each suit, sets a flag for each suit that has a run, including double runs
+/// </summary>
 void Hand::SetRunsInHand()
 {
 	for (ESuit j = ESuit::Clubs; j < ESuit::All; j = (ESuit)((int)(j)+1))
@@ -442,11 +489,21 @@ void Hand::SetRunsInHand()
 	}
 }
 
-uint8 Hand::GetRunSize(ESuit suit)
+/// <summary>
+/// Returns the number of cards in the suit
+/// </summary>
+/// <param name="suit">Suit to check</param>
+/// <returns>Number of cards in that suit</returns>
+uint8 Hand::GetNumberOfCardsInSuit(ESuit suit)
 {
 	return GetNumberOfCardsOfType(ERank::All, suit);
 }
 
+/// <summary>
+/// returns true if hand has a marriage (K and Q) in the suit
+/// </summary>
+/// <param name="suit"></param>
+/// <returns></returns>
 bool Hand::HasMarriageIn(ESuit suit)
 {
 	//ESuitMeld ThisSuit = ESuitMeldAll[(int)(suit)-1];
@@ -478,6 +535,12 @@ bool Hand::HasMarriageIn(ESuit suit)
 	return false;
 }
 
+/// <summary>
+/// Returns the strength of a given suit.
+/// Strength is determined by rank * numberInHand for each rank
+/// </summary>
+/// <param name="suit">suit to check</param>
+/// <returns>strength</returns>
 uint8 Hand::GetSuitValue(ESuit suit)
 {
 	TArray<ACard*> CardsInSuit = GetAllCardsOfSuit(suit);
@@ -491,6 +554,11 @@ uint8 Hand::GetSuitValue(ESuit suit)
 	return Value;
 }
 
+/// <summary>
+/// Gets a TArray of Card Pointers that reference all Cards of the queried suit
+/// </summary>
+/// <param name="suit">suit to get</param>
+/// <returns></returns>
 TArray<ACard*> Hand::GetAllCardsOfSuit(ESuit suit)
 {
 	TArray<ACard*> AllCardsInSuit;
@@ -506,6 +574,10 @@ TArray<ACard*> Hand::GetAllCardsOfSuit(ESuit suit)
 	return AllCardsInSuit;
 }
 
+/// <summary>
+/// Returns total number of aces in hand
+/// </summary>
+/// <returns></returns>
 uint8 Hand::GetNumberOfAces()
 {
 	return GetNumberOfCardsOfType(ERank::Ace, ESuit::All);

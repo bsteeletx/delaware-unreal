@@ -28,15 +28,17 @@ void APlayingArea::BeginPlay()
 	NameOfPlayingArea = GetActorNameOrLabel();
 }
 
+/// <summary>
+/// Actions to take when overlap event is triggered
+/// </summary>
+/// <param name="overlappedActor"></param>
+/// <param name="otherActor"></param>
 void APlayingArea::OnOverlapBegin(AActor* overlappedActor, AActor* otherActor)
 {
 	if (otherActor && (otherActor != this))
 	{
 		ACard* Card = static_cast <ACard*>(otherActor);
-
 		EPlayers CardOwner = Card->GetPlayerOwner();
-
-		//UE_LOG(LogTemp, Warning, TEXT("Checking to see if CardOwner's first letter %c, is equal to the trigger label's first letter %c"), EPlayerAsString[(int)CardOwner - 1][0], NameOfPlayingArea[0]);
 
 		if (NameOfPlayingArea.Len() == 0)
 		{
@@ -48,13 +50,7 @@ void APlayingArea::OnOverlapBegin(AActor* overlappedActor, AActor* otherActor)
 		}
 		else if (EPlayerAsString[(int)CardOwner - 1][0] == NameOfPlayingArea[0])
 		{
-			print("Trigger Stopping Impulse..");
-			//Card->SetToFinalDestination();
 			Card->SlowImpulse();
-		}
-		else
-		{
-			//UE_LOG(LogTemp, Warning, TEXT("CardOwner is %s NameOfPlayingArea is %s"), *EPlayerAsString[(int)CardOwner - 1], *NameOfPlayingArea);
 		}
 	}
 }

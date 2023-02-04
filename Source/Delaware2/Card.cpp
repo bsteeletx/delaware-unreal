@@ -30,6 +30,12 @@ ACard::ACard()
 
 }
 
+ACard::ACard(ERank rank, ESuit suit)
+{
+	Rank = rank;
+	Suit = suit;
+}
+
 // Called when the game starts or when spawned
 void ACard::BeginPlay()
 {
@@ -96,29 +102,49 @@ void ACard::Tick(float DeltaTime)
 	}
 }
 
+/// <summary>
+/// Returns this cards rank as a string
+/// </summary>
+/// <returns>
+/// </returns>
 FString ACard::GetRankAsString() const
 {
 	return RanksAsStrings[(int)GetRank()-1];
 }
 
+
+/// <summary>
+/// Returns this card's suit as a string
+/// </summary>
+/// <returns></returns>
 FString ACard::GetSuitAsString() const
 {
 	return SuitsAsStrings[(int)GetSuit() - 1];
 }
 
+/// <summary>
+/// Returns a string that provides a reasonable definition of what the card is (i.e., "Jack of Clubs")
+/// </summary>
+/// <returns></returns>
 FString ACard::GetFullCardName() const
 {
 	FString Name = GetRankAsString() + " of " + GetSuitAsString();
 	return Name;
 }
 
+/// <summary>
+/// Sets Final Destination to a new value
+/// </summary>
+/// <param name="newDestination">The new FinalDestination</param>
 void ACard::SetFinalDestination(FVector* newDestination)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Final Destination WAS %s"), *FinalDestination.ToCompactString());
 	FinalDestination = *newDestination;
-	UE_LOG(LogTemp, Warning, TEXT("Final Destination is NOW %s"), *FinalDestination.ToCompactString());
 }
 
+/// <summary>
+/// Creates a CardID with the equation: Suit*20 + Rank*4 + CardCopyNumber (there are 3 copies of every card)
+/// </summary>
+/// <returns>uint8 of the new CardID</returns>
 uint8 ACard::CreateCardID()
 {
 	int SuitAsInt = (int)Suit;
@@ -126,10 +152,13 @@ uint8 ACard::CreateCardID()
 	int Counter = GetSuitRankCounter();
 	
 	int NewID = (SuitAsInt-1) * 20 + (RankAsInt-1) * 4 + Counter; 
-	//UE_LOG(LogTemp, Warning, TEXT("Suit %d * 20 + Rank %d * 4 + Counter %d = %d"), SuitAsInt - 1, RankAsInt - 1, Counter, NewID);
 	return NewID;
 }
 
+/// <summary>
+/// Finds the copy # of the card
+/// </summary>
+/// <returns>uint8 of the copy number of the card</returns>
 uint8 ACard::GetSuitRankCounter()
 {
 	const FString Label = GetActorNameOrLabel();
@@ -149,6 +178,11 @@ uint8 ACard::GetSuitRankCounter()
 	return 0;
 }
 
+/// <summary>
+/// Goes through the className and searches for the in game name of the Card and returns the ERank of the card
+/// </summary>
+/// <param name="className">In Game name of the Card</param>
+/// <returns>ERank of the Card</returns>
 ERank ACard::GetRankFromClassName(FString className)
 {
 	if (className.Contains("A"))
@@ -171,6 +205,11 @@ ERank ACard::GetRankFromClassName(FString className)
 	return ERank::Ten;
 }
 
+/// <summary>
+/// Goes through the className and searches for the in-game name of the Card and returns the ESuit of the card
+/// </summary>
+/// <param name="className">In-Game name of the Card</param>
+/// <returns>ESuit of the Card</returns>
 ESuit ACard::GetSuitFromClassName(FString className)
 {
 	if (className.Contains("C_C"))
@@ -189,18 +228,10 @@ ESuit ACard::GetSuitFromClassName(FString className)
 	return ESuit::Spades;
 }
 
-void ACard::SetRank(ERank rank)
-{
-	if (rank != ERank::None)
-		Rank = rank;
-}
-
-void ACard::SetSuit(ESuit suit)
-{
-	if (suit != ESuit::None)
-		Suit = suit;
-}
-
+/// <summary>
+/// old function from previous version of game. Not sure if it will be used in this one or not.
+/// was called when player touched a card. Would cause the card to raise up from his hand just a bit to let the player know which card was selected
+/// </summary>
 void ACard::RaiseHeight()
 {
 	if (!IsRaised)
@@ -216,6 +247,10 @@ void ACard::RaiseHeight()
 	}
 }
 
+/// <summary>
+/// old function from previous version of game. Not sure if it will be used in this one or not.
+/// was called when player was touching this card, but then touched another card. This would reset the card back to its original position
+/// </summary>
 void ACard::ResetHeight()
 {
 	if (IsRaised)
@@ -231,35 +266,50 @@ void ACard::ResetHeight()
 	}
 }
 
+/// <summary>
+/// Takes card and flips it 180 degree so that it is face up instead of face down or vice versa
+/// </summary>
 void ACard::Flip()
 {
 	FRotator Rotation = GetActorRotation();
-	Rotation.Pitch = 180.f;
-	if (GetPlayerOwner() == EPlayers::North)
+
+	if (IsFaceUp)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Flipping %s"), *GetFullCardName())
+		Rotation.Pitch = -180.f;
 	}
+	else
+	{
+		Rotation.Pitch = 180.f;
+	}
+	
 	SetActorRotation(Rotation);
 	IsFaceUp = !IsFaceUp;
 }
 
+/// <summary>
+/// Rotates Card to new rotation value--Yaw only
+/// </summary>
+/// <param name="zValue">The new yaw value to rotate to</param>
 void ACard::Rotate(float zValue)
 {
 	FRotator Rotation(FRotator::ZeroRotator);
 	Rotation.Yaw = zValue;
-	
-	if (GetPlayerOwner() == EPlayers::North)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Rotating %s's %s %f degrees, new rotation is: %s"), *EPlayerAsString[(int)GetPlayerOwner() - 1], *GetFullCardName(), Rotation.Yaw, *Rotation.ToCompactString());
-	}
 	SetActorRotation(Rotation);
 }
 
+/// <summary>
+/// not currently used, we'll see if I use it when I get to it
+/// was to flip boolean telling whether this card's suit was named trump or not
+/// </summary>
 void ACard::ToggleTrump()
 {
 	IsTrumpSuit = !IsTrumpSuit;
 }
 
+/// <summary>
+/// not currently used, but gets the Front, non-trump value of Material Interface
+/// </summary>
+/// <returns>Pointer to Material Interface that represents the front, non-trump version of this card</returns>
 UMaterialInterface* ACard::GetFront()
 {
 	if (Front != nullptr)
@@ -268,6 +318,10 @@ UMaterialInterface* ACard::GetFront()
 	return nullptr;
 }
 
+/// <summary>
+/// not currently used, but get the Trump version of the Material Interface for this card
+/// </summary>
+/// <returns>Pointer to Material Interface that represents the trump version of this card</returns>
 UMaterialInterface* ACard::GetTrump()
 {
 	if (TrumpFront != nullptr)
@@ -276,21 +330,37 @@ UMaterialInterface* ACard::GetTrump()
 	return nullptr;
 }
 
+/// <summary>
+/// returns the ERank of this card
+/// </summary>
+/// <returns></returns>
 ERank ACard::GetRank() const
 {
 	return Rank;
 }
 
+/// <summary>
+/// returns the ESuit of this card
+/// </summary>
+/// <returns></returns>
 ESuit ACard::GetSuit() const
 {
 	return Suit;
 }
 
+/// <summary>
+/// returns the CardID of this card
+/// </summary>
+/// <returns></returns>
 uint8 ACard::GetCardID() const
 {
 	return CardID;
 }
 
+/// <summary>
+/// Enables/Disables Physics, then collision
+/// </summary>
+/// <param name="enableCollision">set to true if you want collision</param>
 void ACard::SetCollision(bool enableCollision)
 {
 	SetPhysics(enableCollision);
@@ -305,11 +375,21 @@ void ACard::SetCollision(bool enableCollision)
 	}
 }
 
+/// <summary>
+/// Enables/Disables Physics
+/// </summary>
+/// <param name="enablePhysics">true to enable Physics</param>
 void ACard::SetPhysics(bool enablePhysics)
 {
 	CardMesh->SetSimulatePhysics(enablePhysics);
 }
 
+/// <summary>
+/// Sets Card to location
+/// </summary>
+/// <param name="location">where card is to be placed</param>
+/// <param name="useCurrentRotation">true if you're not changine the rotation</param>
+/// <param name="rotation">if useCurrentRotation is false, sets the cards rotation to this value</param>
 void ACard::SetToLocation(FVector* location, bool useCurrentRotation, FRotator rotation)
 {
 	if (location == nullptr)
@@ -345,40 +425,53 @@ void ACard::SetToLocation(FVector* location, bool useCurrentRotation, FRotator r
 	//SetActorEnableCollision(true);
 }
 
+/// <summary>
+/// Puts brakes on cards, currently only if they hit the players play area
+/// </summary>
 void ACard::SlowImpulse()
 {
 	if (!HitPlayArea)
-	{ 	//UE_LOG(LogTemp, Warning, TEXT("Card Class Stopping Impulse..."));
+	{ 	
 		CardMesh->AddImpulse(-GetVelocity() / InverseForceMultiplier / 2);
 		HitPlayArea = true;
 	}
 }
 
+/// <summary>
+/// Sends an impulse to a card that drives it towards a location. Sets FinalDestination in case it doesn't quite get there
+/// </summary>
+/// <param name="destination">where to aim the impulse</param>
 void ACard::DealToLocation(FVector* destination)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Attempting to send %s to %s"), *GetFullCardName(), *destination->ToCompactString());
-
 	FVector CardLocation = GetActorLocation();
-
 	FVector ImpulseVector = (*destination - CardLocation)/InverseForceMultiplier; 
-
-	FinalDestination = *destination;
+	SetFinalDestination(destination);
 	
-	//UE_LOG(LogTemp, Warning, TEXT("Adding Impulse to %s of %s"), *GetFullCardName(), *ImpulseVector.ToString());
-	CardMesh->AddImpulse(ImpulseVector); //-1575 + 185
-	//GetStaticMeshComponent()->AddImpulse(ImpulseVector);
+	CardMesh->AddImpulse(ImpulseVector); 
 }
 
+/// <summary>
+/// Sets the OwnedBy variable, which denotes which player controls card
+/// </summary>
+/// <param name="owner">which player is the new owner</param>
 void ACard::SetPlayerOwner(EPlayers owner)
 {
 	OwnedBy = owner;
 }
 
+/// <summary>
+/// Returns Card's player owner
+/// </summary>
+/// <returns></returns>
 EPlayers ACard::GetPlayerOwner()
 {
 	return OwnedBy;
 }
 
+/// <summary>
+/// Returns Card's Final Destination
+/// </summary>
+/// <returns></returns>
 FVector* ACard::GetFinalDestination()
 {
 	return &FinalDestination;

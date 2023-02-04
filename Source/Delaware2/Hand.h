@@ -81,16 +81,23 @@ public:
 	Hand();
 
 	void AddCard(class ACard* toAdd);
+
 	void CalculateMeld();
+	
 	uint8 GetNumberOfCardsOfType(ERank rank, ESuit suit);
-	uint8 GetSize();
+	uint8 GetNumberOfCards();
+	
 	int HasCard(ACard* cardToFind);
 	bool HasMarriageIn(ESuit suit);
+	
 	bool IsSorted();
+	
 	ACard* RemoveCard(ACard* toRemove);
 	void Reset();
+	
 	void Sort();
 
+	//////////Properties--do we need them? And do we need them to be public?
 	bool HasRoundRobin;
 	bool HasDoubleRun;
 
@@ -104,28 +111,46 @@ private:
 	uint8 GetMeldFromPinochles();
 	uint8 GetNumberOfAces();
 	EAroundAmount GetNumberOfAround(ERank rank);
-	uint8 GetRunSize(ESuit suit);
+	uint8 GetNumberOfCardsInSuit(ESuit suit);
 	uint8 GetSuitValue(ESuit suit);
+
+	void RotateCardToProperLocation(ACard* card);
 
 	void SetRoundRobinFlag();
 	void SetRunsInHand();
 
 	void UpdateRanksAround();
 
+	/////////////////UProperties
 	UPROPERTY(VisibleAnywhere)
-		TArray<ACard*> Cards;
+	TArray<ACard*> Cards;
 
-	static TMap<EMeldType, uint8> MeldValues;
-	uint8 RunsInSuits = 0;
+	//////////////Other Properties
 	ESuitMeld DoubleRunInSuit = ESuitMeld::None;
-	ESuitMeld StrongestSuitWithRun = ESuitMeld::None;
-	ESuitMeld StrongestSuit = ESuitMeld::None;
-	uint8 HasMarriageInSuit = 0;
-	uint8 MeldTotal = 0;
-	uint8 Pinochles = 0;
-	uint8 RankAround = 0;
-	uint8 NumberOfMarriagesForEachSuit[4] = { 0, 0, 0, 0 };
-	uint8 SuitValue = 0;
-	int MeldType = 0;
+	
 	bool HandIsSorted = false;
+
+	uint8 HasMarriageInSuit = 0;
+
+	uint8 MeldTotal = 0;
+	int MeldType = 0;
+	static TMap<EMeldType, uint8> MeldValues;
+	
+	uint8 NumberOfMarriagesForEachSuit[4] = { 0, 0, 0, 0 };
+
+	uint8 Pinochles = 0;
+
+	uint8 RankAround = 0;
+	uint8 RunsInSuits = 0;
+	
+	ESuitMeld StrongestSuit = ESuitMeld::None;
+	ESuitMeld StrongestSuitWithRun = ESuitMeld::None;
+	uint8 SuitValue = 0;
+	
+	
+	
+	
+	
+	
+	
 };

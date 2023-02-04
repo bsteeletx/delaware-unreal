@@ -13,7 +13,7 @@ UENUM(BlueprintType)
 enum class EGameStates : uint8 {
 	None = 0,
 	Dealing,
-	Sorting, //Update operator when adding another state
+	Bidding, //Update operator when adding another state
 	All,
 	Any
 }; ////Loading, Menu, Options, Start?, InGameMenu, InGameOptions?, / Animation,
@@ -29,7 +29,7 @@ const static FString EPlayerAsString[] = { "North", "East", "South", "West" };
 
 static EGameStates& operator++ (EGameStates& e)
 {
-	if (e == EGameStates::Sorting)
+	if (e == EGameStates::Bidding)
 	{
 		e = EGameStates::None;
 	}
@@ -43,16 +43,16 @@ static EGameStates& operator++ (EGameStates& e)
 
 static EPlayers operator+ (EPlayers const e, int value)
 {
-	int EasInt = (int)e;
+	int EAsInt = (int)e;
 
-	EasInt += value;
+	EAsInt += value;
 
-	while (EasInt > 4)
+	while (EAsInt > 4)
 	{
-		EasInt -= 4;
+		EAsInt -= 4;
 	}
 
-	return (EPlayers)EasInt;
+	return (EPlayers)EAsInt;
 }
 
 static EPlayers& operator++ (EPlayers& e)
@@ -82,90 +82,77 @@ class DELAWARE2_API ADelaware2GameState : public AGameState
 public:
 	ADelaware2GameState();
 
-	void CardReadyToSort(EPlayers owner);
-
-	uint8 GetCardDealtNumber(class ACard* compare);
-	EGameStates GetCurrentState();
-	EPlayers GetDealer();
-	FVector GetDealLocation(EPlayers toDealTo);
-	uint8 GetDeckCounter() const;
-	ACard* GetNextCard();
-	EPlayers GetPlayerToDealTo() const;
-	static FString EPlayersToString(EPlayers player);
-	static uint8 Atoi(FString string);
-
-	void InitPlayer(EPlayers player, class ADelaware2Pawn* pawn);
-	void IncrementDealer();
-	void PlayerHandSorted(EPlayers playerHandIsSorted);
-	void Reset();
-	void SetDeckCounter(const uint8 counter);
 	virtual void Tick(float DeltaTime) override;
-
+	
 protected:
 
 	virtual void BeginPlay() override;
+
+public:
+	
+	static uint8 Atoi(FString string);
+	
+	void CardReadyToSort(EPlayers owner);
+
+	EGameStates GetCurrentState();
+	EPlayers GetDealer();
+	FVector GetDealLocation(EPlayers toDealTo);
+	ACard* GetNextCard();
+	EPlayers GetPlayerToDealTo() const;
+	static FString EPlayersToString(EPlayers player);
+	
+	void InitPlayer(EPlayers player, class ADelaware2Pawn* pawn);
+	void IncrementDealer();
+	
+	void Reset();
+	
+	void SetHandCounter(const uint8 counter);
 	
 private:
+
 	void DealCard();
 	void DealLocationSetup();
 
-	class ACard* GetCardByID(uint8 value);
-	EDealingLocations GetDealLocationLoc(AActor* target);
-	EPlayers GetDealLocationPlayer(AActor* target);
+	class ACard* GetCardByDeckLocation(uint8 value);
+	EDealingLocations GetDealingTargetPointName(AActor* target);
+	EPlayers GetPlayerNameFromActor(AActor* target);
 	uint8 GetDealingLocationIndex(AActor* target);
 
 	void Shuffle();
 
-	class ADelaware2PlayerState* PlayerStates[4];
-	//class UHandActorComponent* PlayerHands[4];
-
+	//////////////////UProperties
+	
 	UPROPERTY(EditAnywhere, Category = "Dealing")
-		FVector DealingOffset;
-
-	UPROPERTY(EditAnywhere, Category = "Dealing")
-		float DealDelay = 500;
-
-	float DealTime = 500;
-
-	UPROPERTY(EditAnywhere, Category = "State Handling")
-	EGameStates CurrentState;
-
-	UPROPERTY(VisibleAnywhere, Category = "Dealing")
-		TMap<EPlayers, FDealLocationVectors> DealLocations;
-
-	UPROPERTY(EditAnywhere, Category = "Dealing")
-		float CardSpacing;
-
-	UPROPERTY(EditAnywhere, Category = "Dealing")
-		float CardSpacingByDepth;
-
-	UPROPERTY(VisibleAnywhere, Category = "Dealing")
-		TArray<ACard*> Deck;
-
-	UPROPERTY(VisibleAnywhere, Category = "Dealing")
-	EPlayers Dealer;
-
-	EPlayers PlayerToDealTo;
-
-	int8 DeckCounter;
-
-	UPROPERTY(VisibleAnywhere, Category = "Misc")
-		int8 HandCounter;
-
+		float CardSpacingByDepth; 
 	UPROPERTY(EditAnywhere, Category = "Misc")
 		FVector CardStartLocation;
-
-	uint8 SortedHands = 0;
-
+	UPROPERTY(EditAnywhere, Category = "State Handling")
+		EGameStates CurrentState;
+	UPROPERTY(EditAnywhere, Category = "Dealing")
+		float DealDelay = 500;
+	UPROPERTY(VisibleAnywhere, Category = "Dealing")
+		TMap<EPlayers, FDealLocationVectors> DealLocations;
+	UPROPERTY(VisibleAnywhere, Category = "Dealing")
+		EPlayers Dealer;
+	UPROPERTY(EditAnywhere, Category = "Dealing")
+		FVector DealingOffset;
+	UPROPERTY(VisibleAnywhere, Category = "Dealing")
+		TArray<ACard*> Deck;
+	UPROPERTY(VisibleAnywhere, Category = "Misc")
+		int8 HandCounter;
 	UPROPERTY(VisibleAnywhere)
-	class ADelaware2Pawn* Players[4];
+		class ADelaware2Pawn* Players[4];
 
-	bool PlayersInitialized[4] = { false, false, false, false };
-
+	////////////////Other Properties
+	
 	uint8 CardsReadyForSorting[4] = { 0 };
-
+	float DealTime = 500;
+	int8 DeckCounter;
+	//class UHandActorComponent* PlayerHands[4];
 	//TMap<EPlayers, uint64> PlayerIDs; //give each player a random ID #, map it to their Enum Key--Later when adding multiplayer
-
-
+	class ADelaware2PlayerState* PlayerStates[4];
+	EPlayers PlayerToDealTo;
+	bool PlayersInitialized[4] = { false, false, false, false };
+	uint8 SortedHands = 0;
 	
 };

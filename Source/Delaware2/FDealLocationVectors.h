@@ -17,6 +17,11 @@ USTRUCT() struct FDealLocationVectors
 	FVector DealFromLocation;
 	FVector DealToHandLocations[20];
 
+	/// <summary>
+	/// Setup each TargetPoint location in structure
+	/// </summary>
+	/// <param name="location">location in struct to set</param>
+	/// <param name="value">FVector for that location</param>
 	void SetALocation(EDealingLocations location, FVector value)
 	{
 		if (location == EDealingLocations::Deck)
@@ -33,6 +38,12 @@ USTRUCT() struct FDealLocationVectors
 		}
 	}
 
+	/// <summary>
+	/// Setup each TargetPoint location in structure
+	/// </summary>
+	/// <param name="location">location in struct to set</param>
+	/// <param name="indexValue">index of player hand to set location to</param>
+	/// <param name="value">FVector for that location</param>
 	void SetALocation(EDealingLocations location, int indexValue, FVector value)
 	{
 		if (location == EDealingLocations::DealTo)
@@ -46,6 +57,11 @@ USTRUCT() struct FDealLocationVectors
 		}
 	}
 
+	/// <summary>
+	/// Returns EDealingLocations asked for
+	/// </summary>
+	/// <param name="location">Dealing Location asked for</param>
+	/// <returns>FVector of location asked for</returns>
 	const FVector GetALocation(EDealingLocations location)
 	{
 		if (location == EDealingLocations::Deck)
@@ -62,6 +78,12 @@ USTRUCT() struct FDealLocationVectors
 		return FVector::Zero();
 	}
 
+	/// <summary>
+	/// Returns EDealingLocations asked for
+	/// </summary>
+	/// <param name="location">Dealing Location asked for</param>
+	/// <param name="index">Index of Player Hand location</param>
+	/// <returns>FVector of location asked for</returns>
 	const FVector GetALocation(EDealingLocations location, int index)
 	{
 		if (location == EDealingLocations::DealTo)
@@ -82,6 +104,11 @@ USTRUCT() struct FDealLocationVectors
 		return FVector::Zero();
 	}
 
+	/// <summary>
+	/// Get the name of the dealing location--essentially a 'ToString()'
+	/// </summary>
+	/// <param name="location">EDealingLocation to turn to string</param>
+	/// <returns>String representing EDealingLocation</returns>
 	static const FString GetDealingLocationName(EDealingLocations location)
 	{
 		switch (location)

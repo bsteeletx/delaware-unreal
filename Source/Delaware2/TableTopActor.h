@@ -26,14 +26,15 @@ public:
 private:
 
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* TableTopMesh;
+		class UBoxComponent* BoxComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Flipbooks")
+		class UPaperFlipbook* SuitSymbols[5];
 
 	UPROPERTY(EditAnywhere)
-	class UBoxComponent* BoxComponent;
-
+	UStaticMeshComponent* TableTopMesh;
 	UPROPERTY(EditAnywhere)
 	class UPaperFlipbookComponent* TrumpSelectionSymbol;
 
-	UPROPERTY(EditAnywhere, Category = "Flipbooks")
-	class UPaperFlipbook* SuitSymbols[5];
+	
 };

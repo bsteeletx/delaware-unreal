@@ -19,37 +19,32 @@ public:
 
 	ADelaware2PlayerState();
 
-	void AddCardToHand(class ACard* newCard, EPlayers toDealTo);
-	void ClearHand();
-	//void ClearMeld(); //needed?
+	void AddCardToHand(class ACard* newCard);
+	
+	void CalculateMeld();
+
 	uint8 GetNumberOfCardsInHand();
 	uint32 GetPlayerID(); 
 	EPlayers GetPlayerSide();
+	
+	void InitHand();
 	bool IsCardInHand(ACard* cardToFind);
 	bool IsHandSorted();
+	
 	void RemoveCardFromHand(ACard* cardToRemove);
 	void Reset();
+	
 	void SetPlayerID(uint32 PlayerID);
 	void SetPlayerSide(EPlayers side);
 	void SortHand();
-	void CalculateMeld();
-	void InitHand();
-	//class DealTo* GetHand();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 private:
 	
 	class Hand* PlayerHand;
 	uint32 PlayerID;
 	EPlayers PlayerSide;
-	//Not sure if we need below or not--I think we do.
+	
+	//Not sure if we need below or not--I think we do. Will alphabetize when they are definitely needed
 	bool doubleRun;
 	bool roundRobin;
 	short int numOfAces;

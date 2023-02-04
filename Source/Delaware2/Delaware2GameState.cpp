@@ -43,7 +43,6 @@ void ADelaware2GameState::Tick(float DeltaTime)
 
 		if (WaitLonger)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Too soon to deal next card, DealTime is %f"), DealTime)
 			DealTime += DeltaTime;
 			return;
 		}
@@ -60,14 +59,11 @@ void ADelaware2GameState::Tick(float DeltaTime)
 		}
 		else if (FirstCard || !NextSetOfFour) //DealFrom at roughly the same time
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Dealing Card %d"), DeckCounter);
 			DealCard();
-			//UE_LOG(LogTemp, Warning, TEXT("Adding %fl to DealTime %fl"), DeltaTime, DealTime)
 			DealTime += DeltaTime;
 		}
 		else if (NextSetOfFour)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Dealing to Next Player, setting DealTime %fl to -%fl"), DealTime, -4*DealDelay);
 			DealTime = -4*DealDelay; //reset DealTime, giving extra time between players
 			DealCard(); 
 		}
@@ -83,7 +79,6 @@ void ADelaware2GameState::BeginPlay()
 	for (ACard* Card : TActorRange<ACard>(GetWorld()))
 	{
 		CardStartLocation.Z += (CardSpacingByDepth * HeightIterator);
-		//UE_LOG(LogTemp, Warning, TEXT("Starting %s at %s"), *Card->GetFullCardName(), *CardStartLocation.ToCompactString());
 		Card->SetToLocation(&CardStartLocation);
 		Card->SetActorRotation(FRotator::ZeroRotator);
 		Deck.Emplace(Card);
@@ -93,52 +88,31 @@ void ADelaware2GameState::BeginPlay()
 	DealLocationSetup();
 
 	Shuffle();
-
-	
-	
 }
 
-uint8 ADelaware2GameState::GetCardDealtNumber(ACard* compare)
-{
-	uint8 CardCounter = 0;
-
-	for (int i = 0; i < GetDeckCounter(); i++)
-	{
-		if (Deck[i] == compare)
-		{
-			CardCounter++;
-		}
-	}
-
-	return CardCounter;
-}
-
+/// <summary>
+/// Set up all of the locations of Targets that were placed in the level as Dealing To Locations including Deck Location, and Dealing From Location
+/// </summary>
 void ADelaware2GameState::DealLocationSetup()
 {
 	FDealLocationVectors Locations[4];
 
 	for (AActor* Actor : TActorRange<AActor>(GetWorld()))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Actor: %s"), *Actor->GetName());
-
-		EPlayers ThisPlayer = GetDealLocationPlayer(Actor); //Player
+		EPlayers ThisPlayer = GetPlayerNameFromActor(Actor); //Player
 		
 		if (ThisPlayer != EPlayers::None)
 		{
-			EDealingLocations ThisLocation = GetDealLocationLoc(Actor); //DealFrom, DealTo, or Deck
+			EDealingLocations ThisLocation = GetDealingTargetPointName(Actor); //DealFrom, DealTo, or Deck
 
 			if (ThisLocation != EDealingLocations::DealTo)
 			{
 				Locations[(int)ThisPlayer - 1].SetALocation(ThisLocation, Actor->GetActorLocation());
-				//UE_LOG(LogTemp, Warning, TEXT("Setting Location %d for Player %d"), (int)GetDealLocationLoc(Actor), (int)ThisPlayer - 1);
-				//UE_LOG(LogTemp, Warning, TEXT("Target Name: %s, is at %s"), *Actor->GetActorNameOrLabel(), *Locations->GetALocation(ThisLocation).ToCompactString());
 			}
 			else
 			{
 				uint8 IndexLocation = GetDealingLocationIndex(Actor);
 				Locations[(int)ThisPlayer - 1].SetALocation(ThisLocation, IndexLocation, Actor->GetActorLocation());
-				//UE_LOG(LogTemp, Warning, TEXT("Setting Location %d for Player %d"), (int)GetDealLocationLoc(Actor), (int)ThisPlayer - 1);
-				//UE_LOG(LogTemp, Warning, TEXT("Target Name: %s, is at %s"), *Actor->GetActorNameOrLabel(), *Locations->GetALocation(ThisLocation).ToCompactString());
 			}
 		}
 	}
@@ -149,28 +123,29 @@ void ADelaware2GameState::DealLocationSetup()
 	}
 }
 
+/// <summary>
+/// Find which Player State the target is associated with
+/// </summary>
+/// <param name="target">PlayerState as AActor</param>
+/// <returns>uint8 of PlayerState number</returns>
 uint8 ADelaware2GameState::GetDealingLocationIndex(AActor* target)
 {
 	int32 Ending = 0;
 	FString End = "";
 
-	//if (target->GetActorNameOrLabel().Contains(TEXT("West")))
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("%s is at %s"), *target->GetActorNameOrLabel(), *target->GetActorLocation().ToCompactString());
-	//}
-	//UE_LOG(LogTemp, Warning, TEXT("Target Name and Location: %s (%s)"), *target->GetActorNameOrLabel(), *target->GetActorLocation().ToCompactString());
 	End = target->GetActorNameOrLabel().Right(2);
-	//UE_LOG(LogTemp, Warning, TEXT("Stripped Ending of Target is: %s"), *End);
 	Ending = Atoi(*target->GetActorNameOrLabel().Right(2));
-	//UE_LOG(LogTemp, Warning, TEXT("Ending for Target Name %s is: %d"), *target->GetActorNameOrLabel(), Ending);
 	return Ending - 1;
 }
 
+/// <summary>
+/// Had to make my own Atoi as the one in Unreal didn't work for some reason
+/// </summary>
+/// <param name="string">Maximum 3 characters, all must be numbers</param>
+/// <returns>uint8 value of characters if they were numbers</returns>
 uint8 ADelaware2GameState::Atoi(FString string)
 {
 	int8 values[3] = { -1, -1, -1 };
-
-	//UE_LOG(LogTemp, Warning, TEXT("Atoi received string: %s"), *string);
 
 	if (string.Len() > 3)
 		return 0;
@@ -197,12 +172,15 @@ uint8 ADelaware2GameState::Atoi(FString string)
 		}
 	}
 
-	//UE_LOG(LogTemp, Warning, TEXT("Atoi returning value: %d"), total);
-
 	return total;
 }
 
-EDealingLocations ADelaware2GameState::GetDealLocationLoc(AActor* target)
+/// <summary>
+/// Find out which deal location target is
+/// </summary>
+/// <param name="target">TargetPoint</param>
+/// <returns>EDealingLocations enum of what target TargetPoint is referencing</returns>
+EDealingLocations ADelaware2GameState::GetDealingTargetPointName(AActor* target)
 {
 	if (target->GetActorNameOrLabel().Contains(TEXT("Deal")))
 	{
@@ -220,8 +198,12 @@ EDealingLocations ADelaware2GameState::GetDealLocationLoc(AActor* target)
 	//return 3;
 }
 
-
-EPlayers ADelaware2GameState::GetDealLocationPlayer(AActor* target)
+/// <summary>
+/// Returns player name of target, if valid
+/// </summary>
+/// <param name="target">Player to find name of</param>
+/// <returns>EPlayers enum referencing player name</returns>
+EPlayers ADelaware2GameState::GetPlayerNameFromActor(AActor* target)
 {
 	if (target->GetActorNameOrLabel().Contains(TEXT("North")))
 	{
@@ -244,23 +226,22 @@ EPlayers ADelaware2GameState::GetDealLocationPlayer(AActor* target)
 	return EPlayers::None;
 }
 
+/// <summary>
+/// Deal next card to the appropriate player
+/// </summary>
 void ADelaware2GameState::DealCard()
 {
 	if (DeckCounter % 4 == 0)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("%d mod 4 is 0"), DeckCounter);
 		if (DeckCounter == 0)
 		{
 			PlayerToDealTo = Dealer + 1;
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Telling system to increment PlayerToDealTo"));
 			++PlayerToDealTo;
 		}
 	}
-
-	//UE_LOG(LogTemp, Warning, TEXT("Dealing Card %d to Player %d"), DeckCounter, (int)PlayerToDealTo);
 
 	if (DeckCounter > 79)
 	{
@@ -272,7 +253,6 @@ void ADelaware2GameState::DealCard()
 	FVector LocationToDealFrom = DealLocations[Dealer].GetALocation(EDealingLocations::DealFrom);
 	LocationToDealFrom.Z += DeckCounter * CardSpacingByDepth;
 	CardToDeal->SetToLocation(&LocationToDealFrom);
-	//UE_LOG(LogTemp, Warning, TEXT("Adding Card %s to deal"), *CardToDeal->GetFullCardName())
 
 	if (DealLocations.Num() != 4)
 	{
@@ -282,15 +262,16 @@ void ADelaware2GameState::DealCard()
 
 	FVector LocationToDealTo = GetDealLocation(PlayerToDealTo);
 
-	//UE_LOG(LogTemp, Warning, TEXT("GameState: Received LocationToDealTo as: %s"), *LocationToDealTo.ToCompactString());
-
 	CardToDeal->SetPlayerOwner(PlayerToDealTo);
 	CardToDeal->DealToLocation(&LocationToDealTo);
-	//UE_LOG(LogTemp, Warning, TEXT("Dealing %s\tto %s,\tslot %d,\twhich is at %s"), *CardToDeal->GetFullCardName(), *EPlayerAsString[(int)PlayerToDealTo - 1], (DeckCounter-1) / 16 * 4 + (DeckCounter-1) % 4, *LocationToDealTo.ToCompactString());
-	PlayerStates[(int)PlayerToDealTo - 1]->AddCardToHand(CardToDeal, PlayerToDealTo);
-	//PlayerHands[(int)PlayerToDealTo - 1]->AddCard(CardToDeal);
+	PlayerStates[(int)PlayerToDealTo - 1]->AddCardToHand(CardToDeal);
 }
 
+/// <summary>
+/// Returns location of next target to deal to
+/// </summary>
+/// <param name="playerToDealTo">EPlayers enum of which player to deal to</param>
+/// <returns>location of next dealing target</returns>
 FVector ADelaware2GameState::GetDealLocation(EPlayers playerToDealTo)
 {
 	int Index = 0; 
@@ -302,6 +283,9 @@ FVector ADelaware2GameState::GetDealLocation(EPlayers playerToDealTo)
 	return DealLocations[PlayerToDealTo].GetALocation(EDealingLocations::DealTo, Index);
 }
 
+/// <summary>
+/// Called either after each hand or at the end of the game, not sure which (not being used yet)
+/// </summary>
 void ADelaware2GameState::Reset()
 {
 	Shuffle();
@@ -317,20 +301,22 @@ void ADelaware2GameState::Reset()
 
 	DeckCounter = 0;
 	HandCounter = 0;
-
 	SortedHands = 0;
 }
 
-uint8 ADelaware2GameState::GetDeckCounter() const
-{
-	return DeckCounter - 1;
-}
-
-void ADelaware2GameState::SetDeckCounter(uint8 counter)
+/// <summary>
+/// Looks like it sets the Hand Counter to whatever you want, which isn't logical. You either increment that HandCounter, or set it to zero
+/// I'm not sure why it's a set and not an increment? Maybe to set it to 0 after game is over?
+/// </summary>
+/// <param name="counter">number that HandCounter equals</param>
+void ADelaware2GameState::SetHandCounter(uint8 counter)
 {
 	HandCounter = counter;
 }
 
+/// <summary>
+/// Shuffles cards before deal
+/// </summary>
 void ADelaware2GameState::Shuffle()
 {
 	uint8 Random;
@@ -353,62 +339,80 @@ void ADelaware2GameState::Shuffle()
 	}*/
 }
 
-ACard* ADelaware2GameState::GetCardByID(uint8 value)
+/// <summary>
+/// Gets a Card by it's location in deck
+/// </summary>
+/// <param name="value">index of card in the deck</param>
+/// <returns>Pointer to a card in the deck</returns>
+ACard* ADelaware2GameState::GetCardByDeckLocation(uint8 value)
 {
 	return Deck[value];
 }
 
+/// <summary>
+/// Gets the next Card in the deck AND increments the deck's counter
+/// </summary>
+/// <returns>A pointer to the next card in the deck</returns>
 ACard* ADelaware2GameState::GetNextCard()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Getting Next Card, DeckCounter: %d"), DeckCounter);
-	return GetCardByID(DeckCounter++);
+	return GetCardByDeckLocation(DeckCounter++);
 }
 
+/// <summary>
+/// Gets the current dealer
+/// </summary>
+/// <returns></returns>
 EPlayers ADelaware2GameState::GetDealer()
 {
 	return Dealer;
 }
 
+/// <summary>
+/// Increments the current dealer to the next player
+/// </summary>
 void ADelaware2GameState::IncrementDealer()
 {
 	++Dealer;
 }
 
+/// <summary>
+/// returns an EGameState that represents the current state of the game
+/// </summary>
+/// <returns></returns>
 EGameStates ADelaware2GameState::GetCurrentState()
 {
 	return CurrentState;
 }
 
-void ADelaware2GameState::PlayerHandSorted(EPlayers playerWithSortedHand)
-{
-	SortedHands += (int)playerWithSortedHand;
-
-	if (SortedHands == 10) //1 + 2 + 3 + 4
-	{
-		++CurrentState;
-	}
-}
-
-EPlayers ADelaware2GameState::GetPlayerToDealTo() const
-{
-	return PlayerToDealTo;
-}
-
+/// <summary>
+/// Returns an FString that represents the EPlayers equivalent--essentially a 'ToString' method
+/// /// </summary>
+/// <param name="player">EPlayers Enum of player to turn into a string</param>
+/// <returns>actual string of the EPlayers Enum</returns>
 FString ADelaware2GameState::EPlayersToString(EPlayers player)
 {
 	return EPlayerAsString[(int)player - 1];
 }
 
+/// <summary>
+/// Assigns Player Pawns to each player in the game
+/// </summary>
+/// <param name="player">EPlayers to receive Pawn</param>
+/// <param name="pawn">ADelaware2Pawn* to give to EPlayers</param>
 void ADelaware2GameState::InitPlayer(EPlayers player, ADelaware2Pawn* pawn)
 {
 	uint8 PlayerNumber = (int)player - 1;
-	UE_LOG(LogTemp, Warning, TEXT("Assigning Player state %d to Game State Member %d"), PlayerNumber, PlayerNumber);
 	Players[PlayerNumber] = pawn;
 	PlayerStates[PlayerNumber] = static_cast<ADelaware2PlayerState*>(Players[PlayerNumber]->GetPlayerState());
 	PlayerStates[PlayerNumber]->SetPlayerID(PlayerNumber);
 	PlayerStates[PlayerNumber]->InitHand();
 }
 
+/// <summary>
+/// This replaces the sorting state that was in previously. Each time a player receives their 4th card, it triggers an automatic sort
+/// </summary>
+/// <param name="owner">Player to check if they are ready to sort</param>
 void ADelaware2GameState::CardReadyToSort(EPlayers owner)
 {
 	uint8 PlayerNumber = (int)owner - 1;

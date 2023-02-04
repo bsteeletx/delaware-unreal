@@ -29,6 +29,7 @@ class DELAWARE2_API ACard : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ACard();
+	ACard(ERank rank, ESuit suit);
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -39,7 +40,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	
+
 	void DealToLocation(FVector* destination);
 	
 	void Flip();
@@ -61,67 +62,51 @@ public:
 	void SetFinalDestination(FVector* newDestination);
 	void SetPhysics(bool enablePhysics);
 	void SetPlayerOwner(EPlayers player);
-	void SetRank(ERank rank);
-	void SetSuit(ESuit suit);
 	void SetToLocation(FVector* location, bool useCurrentRotation = false, FRotator rotation = FRotator::ZeroRotator);
 	void SlowImpulse();
 	
-
 	void ToggleTrump();
 
 private:
 
 	uint8 CreateCardID();
+
+	class UMaterialInterface* GetFront();
+	UMaterialInterface* GetTrump();
 	ERank GetRankFromClassName(FString className);
 	ESuit GetSuitFromClassName(FString className);
 	uint8 GetSuitRankCounter();
 
-	UFUNCTION()
-	class UMaterialInterface* GetFront();
-
-	UFUNCTION()
-	class UMaterialInterface* GetTrump();
-
-	//////////////////////////////////
-
-	UPROPERTY(EditAnywhere)
-	class UMaterialInterface* Front;
+	///////////Unreal Properties
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* Back;
-	
-	UPROPERTY(EditAnywhere)
-	UMaterialInterface* TrumpFront;
-	
-	UPROPERTY(EditAnywhere)
-	ESuit Suit;
-
-	UPROPERTY(EditAnywhere)
-	ERank Rank;
-
 	UPROPERTY(VisibleAnywhere)
 	uint8 CardID;
-
 	UPROPERTY(EditAnywhere)
-	float HoverRaiseAmount = 25.f;
-
+	UStaticMeshComponent* CardMesh;
 	UPROPERTY(EditAnywhere)
 	float CardMoveSpeed = 25.f;
-
-	bool IsTrumpSuit = false;
-	bool IsFaceUp = false;
-	bool IsRaised = false;
-	bool HitPlayArea = false;
-	bool HasFiredSort = false;
-
-	FVector FinalDestination = { 0.0, 0.0, 0.0 };
-
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* Front;
+	UPROPERTY(EditAnywhere)
+	float HoverRaiseAmount = 25.f;
 	UPROPERTY(EditAnywhere)
 	float InverseForceMultiplier = 5.f;
-
 	UPROPERTY(VisibleAnywhere)
-		EPlayers OwnedBy;
-
+	EPlayers OwnedBy;
 	UPROPERTY(EditAnywhere)
-		UStaticMeshComponent* CardMesh;
+	ERank Rank;
+	UPROPERTY(EditAnywhere)
+	ESuit Suit;
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* TrumpFront;
+
+	//////////Properties
+	FVector FinalDestination = { 0.0, 0.0, 0.0 };
+	bool HasFiredSort = false;
+	bool HitPlayArea = false;
+	bool IsFaceUp = false;
+	bool IsRaised = false;
+	bool IsTrumpSuit = false;
 };

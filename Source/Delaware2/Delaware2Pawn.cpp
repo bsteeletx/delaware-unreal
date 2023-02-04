@@ -52,17 +52,6 @@ void ADelaware2Pawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	/*
-	ADelaware2GameState* GameState = static_cast<ADelaware2GameState*>(GetWorld()->GetGameState());
-
-	if (GameState->GetCurrentState() == EGameStates::Sorting)
-	{
-		if (!PlayerHand->IsSorted())
-		{
-			PlayerHand->Sort();
-		}
-
-	}*/
 }
 
 // Called to bind functionality to input
