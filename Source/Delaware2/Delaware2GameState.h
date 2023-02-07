@@ -90,23 +90,33 @@ protected:
 
 public:
 	
+	/*****************UFUNCTIONS*/
+	UFUNCTION(BlueprintCallable)
+	EGameStates GetCurrentState();
+	UFUNCTION(BluePrintCallable)
+	EPlayers GetDealer();
+	UFUNCTION(BluePrintCallable)
+	EPlayers IncrementEPlayers(EPlayers e);
+
 	static uint8 Atoi(FString string);
-	
+
 	void CardReadyToSort(EPlayers owner);
 
-	EGameStates GetCurrentState();
-	EPlayers GetDealer();
-	FVector GetDealLocation(EPlayers toDealTo);
-	ACard* GetNextCard();
-	EPlayers GetPlayerToDealTo() const;
 	static FString EPlayersToString(EPlayers player);
+
+	FVector GetDealLocation(EPlayers toDealTo);
+	class ACard* GetNextCard();
 	
-	void InitPlayer(EPlayers player, class ADelaware2Pawn* pawn);
 	void IncrementDealer();
-	
+	void InitPlayer(EPlayers player, class ADelaware2Pawn* pawn);
+		
 	void Reset();
 	
 	void SetHandCounter(const uint8 counter);
+
+////////////////////UProperties
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+		TSubclassOf<class UDelaware2BiddingWidget> BidPhaseWidgetSubclass;
 	
 private:
 
@@ -114,9 +124,12 @@ private:
 	void DealLocationSetup();
 
 	class ACard* GetCardByDeckLocation(uint8 value);
+	uint8 GetDealingLocationIndex(AActor* target);
 	EDealingLocations GetDealingTargetPointName(AActor* target);
 	EPlayers GetPlayerNameFromActor(AActor* target);
-	uint8 GetDealingLocationIndex(AActor* target);
+	
+	void HandleBiddingState();
+	void HandleDealingState(float DeltaTime);
 
 	void Shuffle();
 
@@ -142,6 +155,9 @@ private:
 		int8 HandCounter;
 	UPROPERTY(VisibleAnywhere)
 		class ADelaware2Pawn* Players[4];
+
+	UPROPERTY()
+		UDelaware2BiddingWidget* BidPhaseWidget;
 
 	////////////////Other Properties
 	

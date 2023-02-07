@@ -130,7 +130,7 @@ void Hand::AddCard(ACard* toAdd)
 /// Takes card and rotates it by which owner controls it
 /// </summary>
 /// <param name="card"></param>
-void RotateCardToProperLocation(ACard* card)
+void Hand::RotateCardToProperLocation(ACard* card)
 {
 	ADelaware2GameState* GameState = static_cast<ADelaware2GameState*>(card->GetWorld()->GetGameState());
 	EPlayers Owner = card->GetPlayerOwner();
@@ -282,7 +282,8 @@ EAroundAmount Hand::GetNumberOfAround(ERank rank)
 
 	for (int j = (int)ESuit::Clubs; j < (int)ESuit::All; j++)
 	{
-		if (HasCard(&ACard(rank, (ESuit)j)))
+		ACard Temp = ACard(rank, (ESuit)j);
+		if (HasCard(&Temp))
 		{
 			if (Has2xAround && GetNumberOfCardsOfType(rank, (ESuit)j) < 2)
 				Has2xAround = false;

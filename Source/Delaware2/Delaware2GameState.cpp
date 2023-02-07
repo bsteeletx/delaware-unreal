@@ -9,6 +9,8 @@
 #include "Delaware2Pawn.h"
 #include "Hand.h"
 #include "Misc/CString.h"
+#include "Blueprint/UserWidget.h"
+#include "Delaware2BiddingWidget.h"
 
 ADelaware2GameState::ADelaware2GameState()
 {
@@ -31,42 +33,10 @@ void ADelaware2GameState::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//UE_LOG(LogTemp, Warning, TEXT("Tick Function called!"));
-
-	if (CurrentState == EGameStates::Dealing)
+	switch (CurrentState)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Dealing State!"));
-		const bool WithinDeckCounterRange = (DeckCounter < 80 && DeckCounter >= 0); //DeckCounter is incremented in GetNextCard
-		const bool WaitLonger = DealTime < DealDelay;
-		const bool NextSetOfFour = (DeckCounter + 1) % 4 == 0;
-		const bool FirstCard = DeckCounter == 0;
-
-		if (WaitLonger)
-		{
-			DealTime += DeltaTime;
-			return;
-		}
-
-		if (!WithinDeckCounterRange)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Finished Dealing"));
-			//in case some cards didn't quite make it, do one more sort
-			for (ADelaware2PlayerState* Player : PlayerStates)
-			{
-				Player->SortHand();
-			}
-			++CurrentState;
-		}
-		else if (FirstCard || !NextSetOfFour) //DealFrom at roughly the same time
-		{
-			DealCard();
-			DealTime += DeltaTime;
-		}
-		else if (NextSetOfFour)
-		{
-			DealTime = -4*DealDelay; //reset DealTime, giving extra time between players
-			DealCard(); 
-		}
+	case (EGameStates::Dealing): HandleDealingState(DeltaTime);
+	case (EGameStates::Bidding): HandleBiddingState();
 	}
 }
 
@@ -88,6 +58,59 @@ void ADelaware2GameState::BeginPlay()
 	DealLocationSetup();
 
 	Shuffle();
+}
+
+void ADelaware2GameState::HandleDealingState(float DeltaTime)
+{
+	const bool WithinDeckCounterRange = (DeckCounter < 80 && DeckCounter >= 0); //DeckCounter is incremented in GetNextCard
+	const bool WaitLonger = DealTime < DealDelay;
+	const bool NextSetOfFour = (DeckCounter + 1) % 4 == 0;
+	const bool FirstCard = DeckCounter == 0;
+
+	if (WaitLonger)
+	{
+		DealTime += DeltaTime;
+		return;
+	}
+
+	if (!WithinDeckCounterRange)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Finished Dealing"));
+		//in case some cards didn't quite make it, do one more sort
+		for (ADelaware2PlayerState* Player : PlayerStates)
+		{
+			Player->SortHand();
+		}
+		++CurrentState;
+	}
+	else if (FirstCard || !NextSetOfFour) //DealFrom at roughly the same time
+	{
+		DealCard();
+		DealTime += DeltaTime;
+	}
+	else if (NextSetOfFour)
+	{
+		DealTime = -4 * DealDelay; //reset DealTime, giving extra time between players
+		DealCard();
+	}
+}
+
+/// <summary>
+/// Everything involved in Bidding
+/// </summary>
+void ADelaware2GameState::HandleBiddingState()
+{
+	if (BidPhaseWidgetSubclass)
+	{
+		if (!BidPhaseWidget)
+		{
+			BidPhaseWidget = static_cast<UDelaware2BiddingWidget*>(CreateWidget<UUserWidget>(GetWorld(), BidPhaseWidgetSubclass, TEXT("BidPhase Widget")));
+		}
+		if (!BidPhaseWidget->GetIsVisible())
+		{
+			BidPhaseWidget->AddToViewport();
+		}
+	}
 }
 
 /// <summary>
@@ -366,6 +389,16 @@ ACard* ADelaware2GameState::GetNextCard()
 EPlayers ADelaware2GameState::GetDealer()
 {
 	return Dealer;
+}
+
+/// <summary>
+/// Increments EPlayers variable by using the overloaded operator which takes into account restarting at the beginning
+/// </summary>
+/// <param name="e"></param>
+/// <returns></returns>
+EPlayers ADelaware2GameState::IncrementEPlayers(EPlayers e)
+{
+	return ++e;
 }
 
 /// <summary>
