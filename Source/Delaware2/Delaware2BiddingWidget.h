@@ -23,19 +23,8 @@ public:
 	virtual void SynchronizeProperties() override;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	class UImage* NorthBidBubble;
+		class UImage* BidBubbles[4];
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UImage* EastBidBubble;
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UImage* SouthBidBubble;
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UImage* WestBidBubble;
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	class UTextBlock* NorthBidText;
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UTextBlock* EastBidText;
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UTextBlock* SouthBidText;
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UTextBlock* WestBidText;
+		class UTextBlock* BidValues[4];
+	
 };

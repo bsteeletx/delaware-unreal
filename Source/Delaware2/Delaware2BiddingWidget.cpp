@@ -16,22 +16,6 @@ void UDelaware2BiddingWidget::NativeConstruct()
 void UDelaware2BiddingWidget::SynchronizeProperties()
 {
 	Super::SynchronizeProperties();
-
-	if (NorthBidText)
-	{
-		NorthBidText->SetText(FText::FromString(TEXT("100")));
-	}
-	if (EastBidText)
-	{
-		EastBidText->SetText(FText::FromString(TEXT("Pass")));
-	}
-	if (SouthBidText)
-	{
-		SouthBidText->SetText(FText::FromString(TEXT("Pass")));
-	}
-	if (WestBidText)
-	{
-		WestBidText->SetText(FText::FromString(TEXT("Pass")));
-	}
 	
+
 }

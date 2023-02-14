@@ -4,7 +4,8 @@
 #include "Card.h"
 #include "Materials/Material.h"
 #include "Components/BoxComponent.h"
-#include "Delaware2GameState.h"
+//#include "Delaware2GameState.h"
+#include "TableTopActor.h"
 #include "Delaware2GameMode.h"
 
 
@@ -95,7 +96,7 @@ void ACard::Tick(float DeltaTime)
 		{
 			if (GetVelocity().IsNearlyZero(1) && GetPlayerOwner() != EPlayers::None && HitPlayArea && !HasFiredSort)
 			{
-				GameState->CardReadyToSort(GetPlayerOwner());
+				GameState->TellTableToSortPlayerCards(GetPlayerOwner());
 				HasFiredSort = true;
 			}
 		}
